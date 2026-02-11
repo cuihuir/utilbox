@@ -90,7 +90,7 @@ class NetworkScanner:
         self,
         network: str,
         ports: Optional[List[int]] = None,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None,
+        progress_callback: Optional[Callable[[int, int, str, Optional[Dict]], None]] = None,
         max_workers: int = 50
     ) -> List[Dict]:
         """
@@ -99,7 +99,7 @@ class NetworkScanner:
         Args:
             network: 网络段，如 "192.168.1.0/24"
             ports: 要扫描的端口列表，默认使用DEFAULT_PORTS
-            progress_callback: 进度回调函数 (current, total, message)
+            progress_callback: 进度回调函数 (current, total, message, host_result)
             max_workers: 最大并发数
 
         Returns:
@@ -134,13 +134,14 @@ class NetworkScanner:
                             if progress_callback:
                                 open_ports = [p for p, is_open in result['ports'].items() if is_open]
                                 ports_str = ', '.join([f"{p}({self.DEFAULT_PORTS.get(p, 'Unknown')})" for p in open_ports])
-                                progress_callback(i, total, f"发现: {ip} - {ports_str}")
+                                # 传递主机结果，实时显示
+                                progress_callback(i, total, f"发现: {ip} - {ports_str}", result)
                         else:
                             if progress_callback:
-                                progress_callback(i, total, f"扫描: {ip}")
+                                progress_callback(i, total, f"扫描: {ip}", None)
                     except Exception as e:
                         if progress_callback:
-                            progress_callback(i, total, f"错误: {ip} - {str(e)}")
+                            progress_callback(i, total, f"错误: {ip} - {str(e)}", None)
 
             # 按IP地址排序
             active_hosts.sort(key=lambda x: ipaddress.IPv4Address(x['ip']))
@@ -148,7 +149,7 @@ class NetworkScanner:
 
         except Exception as e:
             if progress_callback:
-                progress_callback(0, 0, f"扫描错误: {str(e)}")
+                progress_callback(0, 0, f"扫描错误: {str(e)}", None)
             return []
         finally:
             self.is_scanning = False

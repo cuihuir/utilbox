@@ -141,10 +141,13 @@ class LanScannerPage(ctk.CTkFrame):
         # 结果文本框（使用CTkTextbox）
         self.result_text = ctk.CTkTextbox(
             result_frame,
-            font=ctk.CTkFont(family="Courier New", size=11),
+            font=ctk.CTkFont(family="Courier New", size=13),
             wrap="none"
         )
         self.result_text.pack(pady=5, padx=10, fill="both", expand=True)
+
+        # 初始化结果计数
+        self.found_count = 0
 
     def _auto_detect_network(self):
         """自动检测网络信息"""
@@ -177,6 +180,13 @@ class LanScannerPage(ctk.CTkFrame):
         # 清空结果
         self.result_text.delete("1.0", "end")
         self.progress_bar.set(0)
+        self.found_count = 0
+
+        # 显示表头
+        header = f"{'IP地址':<15} {'主机名':<20} {'开放端口'}\n"
+        separator = "=" * 80 + "\n"
+        self.result_text.insert("end", header)
+        self.result_text.insert("end", separator)
 
         # 更新UI状态
         self.is_scanning = True
@@ -190,12 +200,16 @@ class LanScannerPage(ctk.CTkFrame):
     def _scan_thread(self, network: str):
         """扫描线程"""
         try:
-            def progress_callback(current, total, message):
+            def progress_callback(current, total, message, host_result=None):
                 # 更新进度条和状态
                 if total > 0:
                     progress = current / total
                     self.after(0, lambda: self.progress_bar.set(progress))
                 self.after(0, lambda: self.status_label.configure(text=message))
+
+                # 如果发现活跃主机，实时显示
+                if host_result:
+                    self.after(0, lambda: self._add_host_to_results(host_result))
 
             # 执行扫描
             results = self.scanner.scan_network(
@@ -204,45 +218,45 @@ class LanScannerPage(ctk.CTkFrame):
                 max_workers=50
             )
 
-            # 显示结果
-            self.after(0, lambda: self._display_results(results))
+            # 显示统计信息
+            self.after(0, lambda: self._show_summary(results))
 
         except Exception as e:
             self.after(0, lambda: messagebox.showerror("错误", f"扫描失败: {str(e)}"))
         finally:
             self.after(0, self._scan_finished)
 
-    def _display_results(self, results):
-        """显示扫描结果"""
-        self.result_text.delete("1.0", "end")
+    def _add_host_to_results(self, host):
+        """实时添加发现的主机到结果"""
+        self.found_count += 1
 
-        if not results:
-            self.result_text.insert("end", "未发现活跃主机\n")
-            return
+        ip = host['ip']
+        hostname = host['hostname']
+        open_ports = [
+            f"{port}({self.scanner.get_service_name(port)})"
+            for port, is_open in host['ports'].items()
+            if is_open
+        ]
+        ports_str = ', '.join(open_ports)
 
-        # 表头
-        header = f"{'IP地址':<15} {'主机名':<20} {'开放端口'}\n"
-        separator = "=" * 70 + "\n"
-        self.result_text.insert("end", header)
+        line = f"{ip:<15} {hostname:<20} {ports_str}\n"
+        self.result_text.insert("end", line)
+
+        # 自动滚动到底部
+        self.result_text.see("end")
+
+    def _show_summary(self, results):
+        """显示扫描统计信息"""
+        separator = "=" * 80 + "\n"
         self.result_text.insert("end", separator)
 
-        # 结果列表
-        for host in results:
-            ip = host['ip']
-            hostname = host['hostname']
-            open_ports = [
-                f"{port}({self.scanner.get_service_name(port)})"
-                for port, is_open in host['ports'].items()
-                if is_open
-            ]
-            ports_str = ', '.join(open_ports)
+        if self.found_count == 0:
+            self.result_text.insert("end", "\n未发现活跃主机\n")
+        else:
+            self.result_text.insert("end", f"\n扫描完成！共发现 {self.found_count} 台活跃主机\n")
 
-            line = f"{ip:<15} {hostname:<20} {ports_str}\n"
-            self.result_text.insert("end", line)
-
-        # 统计信息
-        self.result_text.insert("end", separator)
-        self.result_text.insert("end", f"\n共发现 {len(results)} 台活跃主机\n")
+        # 自动滚动到底部
+        self.result_text.see("end")
 
     def _scan_finished(self):
         """扫描完成"""
