@@ -1,9 +1,24 @@
 [project]
-name = "png2ico"
-version = "0.1.0"
-description = "A modern GUI tool to convert images to ICO format"
+name = "utilbox"
+version = "1.0.0"
+description = "A modern multi-functional utility toolbox with icon generator and network scanner"
 readme = "README.md"
 requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+    {name = "UtilBox Contributors"}
+]
+keywords = ["utility", "toolbox", "icon-generator", "network-scanner", "gui"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Utilities",
+]
 dependencies = [
     "customtkinter>=5.2.0",
     "pillow>=10.0.0",
@@ -13,3 +28,8 @@ dependencies = [
 dev = [
     "pyinstaller>=6.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/utilbox"
+Repository = "https://github.com/yourusername/utilbox"
+Issues = "https://github.com/yourusername/utilbox/issues"
