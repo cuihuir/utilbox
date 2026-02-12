@@ -2,8 +2,8 @@
 import sys
 from pathlib import Path
 
-# 添加父目录到路径
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# 添加src目录到路径
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from scanner_core import NetworkScanner
 
@@ -42,7 +42,7 @@ def test_scanner():
     print("测试完成！")
     print("=" * 60)
     print("\n提示: 要扫描整个网络，请运行 GUI 程序:")
-    print("  uv run python main_gui.py")
+    print("  python utilbox.py")
     print("\n" + "=" * 60)
 
 

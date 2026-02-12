@@ -8,9 +8,9 @@
 
 ## 📸 界面预览
 
-![主界面](image.png)
+![主界面](docs/images/main.png)
 
-![局域网扫描器](image-1.png)
+![局域网扫描器](docs/images/scanner.png)
 
 ## ✨ 功能特性
 
@@ -47,17 +47,20 @@ cd utilbox
 uv sync
 
 # 运行主程序（需要X11支持）
-uv run python main_gui.py
+uv run python utilbox.py
+
+# 或者直接运行
+python utilbox.py
 ```
 
 ### 单独测试工具
 
 ```bash
 # 测试图标生成器
-uv run python icon_generator.py
+uv run python src/icon_generator.py
 
 # 测试局域网扫描器
-uv run python lan_scanner.py
+uv run python src/lan_scanner.py
 
 # 测试核心功能（无需GUI）
 uv run python tests/test_converter.py
@@ -71,7 +74,7 @@ uv run python tests/test_scanner.py
 uv sync --extra dev
 
 # 2. 运行打包脚本
-uv run python build.py
+uv run python scripts/build.py
 
 # 3. 可执行文件位置
 # dist/toolbox.exe
@@ -111,18 +114,30 @@ uv run python build.py
 
 ```
 utilbox/
-├── main_gui.py          # 主界面入口
-├── icon_generator.py    # 图标生成器页面
-├── lan_scanner.py       # 局域网扫描器页面
-├── converter.py         # 图片转换核心逻辑
-├── scanner_core.py      # 网络扫描核心逻辑
-├── build.py             # Windows打包脚本
-├── tests/               # 测试文件
+├── utilbox.py               # 主程序启动入口
+├── src/                     # 源代码目录
+│   ├── __init__.py
+│   ├── main_gui.py          # 主界面
+│   ├── icon_generator.py    # 图标生成器页面
+│   ├── lan_scanner.py       # 局域网扫描器页面
+│   ├── converter.py         # 图片转换核心逻辑
+│   └── scanner_core.py      # 网络扫描核心逻辑
+├── scripts/                 # 脚本文件
+│   └── build.py             # Windows打包脚本
+├── tests/                   # 测试文件
 │   ├── test_converter.py
 │   └── test_scanner.py
-├── examples/            # 示例图片
-├── pyproject.toml       # 项目配置
-└── README.md            # 说明文档
+├── docs/                    # 文档和截图
+│   └── images/
+│       ├── main.png
+│       └── scanner.png
+├── examples/                # 示例图片
+├── .gitignore
+├── .python-version
+├── LICENSE
+├── README.md
+├── pyproject.toml
+└── uv.lock
 ```
 
 ## 🔧 配置说明
