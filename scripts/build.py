@@ -49,6 +49,9 @@ def build_exe():
         '--hidden-import=lan_scanner',
         '--hidden-import=converter',
         '--hidden-import=scanner_core',
+        # 收集Tcl/Tk数据文件（Linux需要）
+        '--collect-all=tkinter',
+        '--collect-all=customtkinter',
     ]
 
     print("\n打包参数:")

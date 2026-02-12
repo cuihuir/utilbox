@@ -80,6 +80,25 @@ uv run python scripts/build.py
 # dist/toolbox.exe
 ```
 
+### Linux打包
+
+```bash
+# 1. 安装系统依赖
+sudo apt install python3-tk
+
+# 2. 安装开发依赖
+uv sync --extra dev
+
+# 3. 运行打包脚本
+uv run python scripts/build.py
+
+# 4. 可执行文件位置
+# dist/toolbox
+
+# 注意：打包后的程序需要目标机器安装Tcl/Tk库
+# 在目标机器上运行：sudo apt install libtcl9.0 libtk9.0
+```
+
 ## 📖 使用说明
 
 ### 主界面
@@ -177,7 +196,16 @@ DEFAULT_PORTS = {
 ### 打包失败？
 - 确保已安装开发依赖：`uv sync --extra dev`
 - 检查PyInstaller版本是否兼容
-- 确保在Windows环境下打包
+- **Windows**: 确保在Windows环境下打包
+- **Linux**: 确保已安装 `python3-tk`
+
+### Linux打包后无法运行？
+- 错误：`libtcl9.0.so: cannot open shared object file`
+- 解决：在目标机器上安装Tcl/Tk库
+  ```bash
+  sudo apt install libtcl9.0 libtk9.0
+  ```
+- 或者使用 `--onedir` 模式打包（会生成文件夹而非单文件）
 
 ### 扫描器无法发现设备？
 - 检查防火墙设置
