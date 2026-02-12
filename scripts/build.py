@@ -37,7 +37,7 @@ def build_exe():
     args = [
         str(project_root / 'src/main_gui.py'),  # 主程序入口
         '--name=toolbox',                        # 程序名称
-        '--onefile',                             # 打包成单个exe
+        '--onefile',                             # 打包成单个文件
         '--windowed',                            # 无控制台窗口
         '--icon=NONE',                           # 图标（可选）
         '--clean',                               # 清理临时文件

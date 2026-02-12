@@ -33,24 +33,44 @@
 
 ### 前置要求
 
-- Python 3.13+
+- Python 3.13+ (Windows) 或 Python 3.10+ (Linux)
 - [uv](https://github.com/astral-sh/uv) 包管理器
 
-### 安装运行
+### Linux 快速安装
 
 ```bash
 # 克隆项目
 git clone https://github.com/cuihuir/utilbox.git
 cd utilbox
 
-# 安装依赖
+# 运行安装脚本（自动安装 uv 和依赖）
+bash install.sh
+
+# 运行程序
+python utilbox.py
+```
+
+### 手动安装
+
+```bash
+# 克隆项目
+git clone https://github.com/cuihuir/utilbox.git
+cd utilbox
+
+# 安装 uv（如果未安装）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 安装系统依赖（Linux）
+sudo apt install python3-tk fonts-noto-cjk
+
+# 安装 Python 依赖
 uv sync
 
-# 运行主程序（需要X11支持）
-uv run python utilbox.py
-
-# 或者直接运行
+# 运行主程序
 python utilbox.py
+
+# 或者使用 uv run
+uv run python utilbox.py
 ```
 
 ### 单独测试工具
@@ -78,6 +98,43 @@ uv run python scripts/build.py
 
 # 3. 可执行文件位置
 # dist/toolbox.exe
+```
+
+### Linux 使用说明
+
+**推荐：直接运行源码**
+
+由于 Python 3.13 使用 Tcl/Tk 9.0，而大多数 Linux 发行版仍使用 Tcl/Tk 8.6，打包后的程序可能无法在其他机器上运行。
+
+```bash
+# 推荐方式：直接运行源码
+python utilbox.py
+
+# 优点：
+# - 兼容性好，使用系统的 Tcl/Tk 版本
+# - 无需打包，启动快
+# - 方便调试和修改
+```
+
+**可选：打包为单文件**
+
+如果需要打包，建议使用系统 Python（而非 uv 的虚拟环境）：
+
+```bash
+# 1. 使用系统 Python 创建虚拟环境
+python3 -m venv .venv-system
+source .venv-system/bin/activate
+
+# 2. 安装依赖
+pip install customtkinter pillow pyinstaller
+
+# 3. 打包
+python scripts/build.py
+
+# 4. 测试
+./dist/toolbox
+
+# 注意：打包后的程序只能在相同或相近的系统版本上运行
 ```
 
 ### Linux打包
