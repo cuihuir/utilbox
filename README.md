@@ -40,7 +40,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/utilbox.git
+git clone https://github.com/cuihuir/utilbox.git
 cd utilbox
 
 # 安装依赖
@@ -201,8 +201,8 @@ DEFAULT_PORTS = {
 
 ## 👨‍💻 作者
 
-- 项目主页: [https://github.com/yourusername/utilbox](https://github.com/yourusername/utilbox)
-- 问题反馈: [Issues](https://github.com/yourusername/utilbox/issues)
+- 项目主页: [https://github.com/cuihuir/utilbox](https://github.com/cuihuir/utilbox)
+- 问题反馈: [Issues](https://github.com/cuihuir/utilbox/issues)
 
 ## ⭐ Star History
 
