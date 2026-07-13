@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from main_gui import UI_FONT_FAMILY
+from ui_style import UI_FONT_FAMILY
 
 
 class MainGuiFontTests(unittest.TestCase):

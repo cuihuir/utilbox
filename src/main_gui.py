@@ -1,178 +1,126 @@
-"""多功能小工具集合 - 主界面"""
+"""UtilBox main application window."""
 import customtkinter as ctk
+
 from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
-from ui_style import UI_FONT_FAMILY, load_icon, ui_font
+from ui_style import APP_BG, CHEVRON, HEADER_BG, HOVER_SURFACE, INK, MAX_CONTENT_WIDTH, PAGE_MARGIN, PRIMARY, ROW_INSET, SECONDARY, SECTION_INSET, SEPARATOR, SUCCESS, SURFACE, load_icon, ui_font
 
 
 class ToolboxApp(ctk.CTk):
-    """多功能工具箱主应用"""
+    """Desktop-style launcher for the available local tools."""
 
     def __init__(self):
         super().__init__()
-
-        # 窗口配置
-        self.title("多功能工具箱")
+        self.title("工具箱")
         self.geometry("800x600")
-        self.resizable(True, True)
-        self.minsize(700, 500)
-
-        # 设置主题
-        ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("blue")
-
-        # 当前页面
+        self.minsize(700, 540)
+        self.appearance_mode = "light"
+        ctk.set_appearance_mode(self.appearance_mode)
+        self.configure(fg_color=APP_BG)
         self.current_page = None
+        self.home_page = None
+        self.icon_page = None
+        self.scanner_page = None
         self.tool_icons = []
-
-        # 创建主界面
         self._create_main_page()
+        self.after(300, self._preload_pages)
 
     def _create_main_page(self):
-        """创建主界面"""
-        # 清除当前页面
-        if self.current_page:
-            self.current_page.destroy()
+        if self.home_page:
+            self._show_page(self.home_page)
+            return
         self.tool_icons = []
+        page = ctk.CTkFrame(self, fg_color=APP_BG)
+        self.home_page = page
 
-        # 创建主容器
-        main_frame = ctk.CTkFrame(self, fg_color="transparent")
-        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
-        self.current_page = main_frame
+        header = ctk.CTkFrame(page, fg_color=HEADER_BG, height=88, corner_radius=0)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+        ctk.CTkLabel(header, text="工具箱", font=ui_font(31, "bold"), text_color=INK).pack(side="left", padx=PAGE_MARGIN + SECTION_INSET)
+        self.appearance_button = ctk.CTkButton(header, text="深色", font=ui_font(14), text_color=PRIMARY, fg_color="transparent", hover_color=HOVER_SURFACE, width=62, command=self._toggle_appearance)
+        self.appearance_button.pack(side="right", padx=28)
 
-        # 标题
-        title = ctk.CTkLabel(
-            main_frame,
-            text="多功能工具箱",
-            font=ui_font(size=32, weight="bold")
-        )
-        title.pack(pady=(40, 20))
+        footer = ctk.CTkLabel(page, text="UtilBox  ·  版本 1.0.0", font=ui_font(13), text_color=SECONDARY)
+        footer.pack(side="bottom", anchor="w", padx=PAGE_MARGIN + SECTION_INSET, pady=(0, 20))
 
-        subtitle = ctk.CTkLabel(
-            main_frame,
-            text="选择一个工具开始使用",
-            font=ui_font(size=14),
-            text_color="#888888"
-        )
-        subtitle.pack(pady=(0, 40))
+        body = ctk.CTkFrame(page, fg_color="transparent")
+        body.pack(fill="both", expand=True, padx=PAGE_MARGIN, pady=(27, 0))
+        ctk.CTkLabel(body, text="我的工具", font=ui_font(13), text_color=SECONDARY).pack(anchor="w", padx=SECTION_INSET, pady=(0, 10))
+        tools = ctk.CTkFrame(body, fg_color=SURFACE, corner_radius=14)
+        tools.pack(fill="x")
+        self._tool_row(tools, "image-converter", "图标生成器", "把图片转换为 ICO 图标", PRIMARY, self._open_icon_generator)
+        ctk.CTkFrame(tools, fg_color=SEPARATOR, height=1).pack(fill="x", padx=(90, ROW_INSET))
+        self._tool_row(tools, "network-scan", "局域网扫描器", "查找设备并查看开放服务", SUCCESS, self._open_lan_scanner)
 
-        # 工具卡片容器
-        cards_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-        cards_frame.pack(expand=True, fill="both", padx=40)
+        ctk.CTkLabel(body, text="状态", font=ui_font(13), text_color=SECONDARY).pack(anchor="w", padx=SECTION_INSET, pady=(32, 10))
+        status = ctk.CTkFrame(body, fg_color=SURFACE, corner_radius=14, height=72)
+        status.pack(fill="x")
+        status.pack_propagate(False)
+        ctk.CTkLabel(status, text="✓", font=ui_font(17, "bold"), text_color=SUCCESS).pack(side="left", padx=(ROW_INSET, 18))
+        ctk.CTkLabel(status, text="所有工具已准备就绪", font=ui_font(16), text_color=INK).pack(side="left")
+        ctk.CTkLabel(status, text="2 个可用", font=ui_font(14), text_color=SECONDARY).pack(side="right", padx=28)
+        def constrain_content(event):
+            horizontal_padding = max(PAGE_MARGIN, (event.width - MAX_CONTENT_WIDTH) // 2)
+            body.pack_configure(padx=horizontal_padding)
 
-        # 配置网格布局（2列）
-        cards_frame.grid_columnconfigure(0, weight=1)
-        cards_frame.grid_columnconfigure(1, weight=1)
+        page.bind("<Configure>", constrain_content)
+        self._show_page(page)
 
-        # 工具1: 图标生成器
-        self._create_tool_card(
-            cards_frame,
-            row=0, col=0,
-            icon_name="image-converter",
-            title="图标生成器",
-            description="将PNG/JPG等图片转换为ICO格式\n支持多尺寸图标生成",
-            command=self._open_icon_generator,
-            color="#5B8DEE"
-        )
+    def _tool_row(self, parent, icon_name, title, description, color, command):
+        row = ctk.CTkFrame(parent, fg_color=SURFACE, height=76, corner_radius=0)
+        row.pack(fill="x")
+        row.pack_propagate(False)
+        icon = load_icon(icon_name, 38)
+        self.tool_icons.append(icon)
+        icon_label = ctk.CTkLabel(row, text="", image=icon, width=52, height=52, fg_color=color, corner_radius=12)
+        icon_label.place(x=ROW_INSET, y=12)
+        title_label = ctk.CTkLabel(row, text=title, font=ui_font(17, "bold"), text_color=INK, anchor="w")
+        title_label.place(x=90, y=15)
+        description_label = ctk.CTkLabel(row, text=description, font=ui_font(14), text_color=SECONDARY, anchor="w")
+        description_label.place(x=90, y=39)
+        arrow_label = ctk.CTkLabel(row, text="›", font=ui_font(28), text_color=CHEVRON)
+        arrow_label.place(relx=1, x=-42, y=18)
 
-        # 工具2: 局域网扫描器
-        self._create_tool_card(
-            cards_frame,
-            row=0, col=1,
-            icon_name="network-scan",
-            title="局域网扫描器",
-            description="扫描局域网内的活跃主机\n检测开放端口和服务",
-            command=self._open_lan_scanner,
-            color="#2ECC71"
-        )
+        def on_enter(_event):
+            row.configure(fg_color=HOVER_SURFACE)
 
-        # 底部信息
-        footer = ctk.CTkLabel(
-            main_frame,
-            text="v1.0.0 | 更多工具持续添加中...",
-            font=ui_font(size=11),
-            text_color="#666666"
-        )
-        footer.pack(side="bottom", pady=20)
+        def on_leave(_event):
+            row.configure(fg_color=SURFACE)
 
-    def _create_tool_card(self, parent, row, col, icon_name, title, description, command, color):
-        """创建工具卡片"""
-        card = ctk.CTkFrame(
-            parent,
-            fg_color="#2b2b2b",
-            corner_radius=15
-        )
-        card.grid(row=row, column=col, padx=15, pady=15, sticky="nsew")
-
-        # 图标
-        icon_label = ctk.CTkLabel(
-            card,
-            text="",
-            image=load_icon(icon_name, 52)
-        )
-        self.tool_icons.append(icon_label.cget("image"))
-        icon_label.pack(pady=(30, 10))
-
-        # 标题
-        title_label = ctk.CTkLabel(
-            card,
-            text=title,
-            font=ui_font(size=18, weight="bold")
-        )
-        title_label.pack(pady=(0, 10))
-
-        # 描述
-        desc_label = ctk.CTkLabel(
-            card,
-            text=description,
-            font=ui_font(size=12),
-            text_color="#aaaaaa",
-            justify="center"
-        )
-        desc_label.pack(pady=(0, 20), padx=20)
-
-        # 打开按钮
-        open_btn = ctk.CTkButton(
-            card,
-            text="打开工具",
-            command=command,
-            font=ui_font(size=14, weight="bold"),
-            height=40,
-            fg_color=color,
-            hover_color=self._darken_color(color)
-        )
-        open_btn.pack(pady=(0, 30), padx=40, fill="x")
-
-    def _darken_color(self, hex_color):
-        """将颜色变暗"""
-        # 简单的颜色变暗算法
-        hex_color = hex_color.lstrip('#')
-        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        r, g, b = int(r * 0.8), int(g * 0.8), int(b * 0.8)
-        return f"#{r:02x}{g:02x}{b:02x}"
+        for widget in (row, icon_label, title_label, description_label, arrow_label):
+            widget.bind("<Button-1>", lambda _event: command())
+            widget.bind("<Enter>", on_enter)
+            widget.bind("<Leave>", on_leave)
 
     def _open_icon_generator(self):
-        """打开图标生成器"""
-        if self.current_page:
-            self.current_page.destroy()
-
-        self.current_page = IconGeneratorPage(self, self._create_main_page)
-        self.current_page.pack(fill="both", expand=True)
+        if self.icon_page is None:
+            self.icon_page = IconGeneratorPage(self, self._create_main_page)
+        self._show_page(self.icon_page)
 
     def _open_lan_scanner(self):
-        """打开局域网扫描器"""
-        if self.current_page:
-            self.current_page.destroy()
+        if self.scanner_page is None:
+            self.scanner_page = LanScannerPage(self, self._create_main_page)
+        self._show_page(self.scanner_page)
 
-        self.current_page = LanScannerPage(self, self._create_main_page)
-        self.current_page.pack(fill="both", expand=True)
+    def _show_page(self, page):
+        """Swap cached pages without rebuilding their widget trees."""
+        if self.current_page and self.current_page is not page:
+            self.current_page.pack_forget()
+        page.pack(fill="both", expand=True)
+        self.current_page = page
 
+    def _preload_pages(self):
+        """Build tool pages after the launcher has become visible."""
+        if self.icon_page is None:
+            self.icon_page = IconGeneratorPage(self, self._create_main_page)
+        if self.scanner_page is None:
+            self.scanner_page = LanScannerPage(self, self._create_main_page)
 
-def main():
-    """主函数"""
-    app = ToolboxApp()
-    app.mainloop()
+    def _toggle_appearance(self):
+        self.appearance_mode = "dark" if self.appearance_mode == "light" else "light"
+        ctk.set_appearance_mode(self.appearance_mode)
+        self.appearance_button.configure(text="浅色" if self.appearance_mode == "dark" else "深色")
 
 
 if __name__ == "__main__":
-    main()
+    ToolboxApp().mainloop()

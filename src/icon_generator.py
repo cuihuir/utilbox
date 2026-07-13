@@ -4,14 +4,14 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from pathlib import Path
 from converter import ImageConverter
-from ui_style import ui_font
+from ui_style import APP_BG, CONTROL_FILL, CONTROL_HOVER, INK, INPUT_BG, ON_PRIMARY, PRIMARY, PRIMARY_HOVER, SECONDARY, SURFACE, ui_font
 
 
 class IconGeneratorPage(ctk.CTkFrame):
     """图标生成器页面（作为Frame嵌入主窗口）"""
 
     def __init__(self, parent, back_callback):
-        super().__init__(parent, fg_color="transparent")
+        super().__init__(parent, fg_color=APP_BG)
 
         # 初始化转换器
         self.converter = ImageConverter()
@@ -37,8 +37,9 @@ class IconGeneratorPage(ctk.CTkFrame):
             width=80,
             height=32,
             font=ui_font(13),
-            fg_color="#444444",
-            hover_color="#555555"
+            fg_color=CONTROL_FILL,
+            hover_color=CONTROL_HOVER,
+            text_color=INK
         )
         back_btn.pack(side="left")
 
@@ -46,7 +47,7 @@ class IconGeneratorPage(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             top_bar,
             text="图标生成器",
-            font=ui_font(20, weight="bold")
+            font=ui_font(20, weight="bold"), text_color=INK
         )
         title_label.pack(side="left", padx=20)
 
@@ -57,20 +58,21 @@ class IconGeneratorPage(ctk.CTkFrame):
             command=self._select_file,
             font=ui_font(14, weight="bold"),
             height=50,
-            fg_color="#5B8DEE",
-            hover_color="#4A7BD8",
-            text_color="#FFFFFF"
+            fg_color=PRIMARY,
+            hover_color=PRIMARY_HOVER,
+            text_color=ON_PRIMARY
         )
         self.select_btn.pack(pady=10, padx=20, fill="x")
 
         # 图片预览区域
-        preview_frame = ctk.CTkFrame(self)
+        preview_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
         preview_frame.pack(pady=8, padx=20, fill="x")
 
         preview_title = ctk.CTkLabel(
             preview_frame,
             text="图片预览",
-            font=ui_font(12, weight="bold")
+            font=ui_font(12, weight="bold"),
+            text_color=INK
         )
         preview_title.pack(pady=6)
 
@@ -87,12 +89,12 @@ class IconGeneratorPage(ctk.CTkFrame):
             preview_frame,
             text="",
             font=ui_font(10),
-            text_color="gray"
+            text_color=SECONDARY
         )
         self.info_label.pack(pady=4)
 
         # ICO尺寸选择区域
-        size_frame = ctk.CTkFrame(self, fg_color="#2b2b2b", border_width=2, border_color="#1f6aa5")
+        size_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
         size_frame.pack(pady=8, padx=20, fill="x")
 
         # 标题栏带快捷操作
@@ -103,7 +105,7 @@ class IconGeneratorPage(ctk.CTkFrame):
             title_bar,
             text="ICO尺寸选择",
             font=ui_font(12, weight="bold"),
-            text_color="#ffffff"
+            text_color=INK
         )
         size_title.pack(side="left")
 
@@ -118,8 +120,9 @@ class IconGeneratorPage(ctk.CTkFrame):
             width=60,
             height=24,
             font=ui_font(10),
-            fg_color="#1f6aa5",
-            hover_color="#144870"
+            fg_color=CONTROL_FILL,
+            hover_color=CONTROL_HOVER,
+            text_color=PRIMARY
         )
         select_all_btn.pack(side="left", padx=4)
 
@@ -130,8 +133,9 @@ class IconGeneratorPage(ctk.CTkFrame):
             width=60,
             height=24,
             font=ui_font(10),
-            fg_color="#666666",
-            hover_color="#555555"
+            fg_color=CONTROL_FILL,
+            hover_color=CONTROL_HOVER,
+            text_color=INK
         )
         clear_all_btn.pack(side="left", padx=4)
 
@@ -157,11 +161,11 @@ class IconGeneratorPage(ctk.CTkFrame):
                 checkbox_height=22,
                 border_width=2,
                 corner_radius=4,
-                fg_color="#2fa572",
-                hover_color="#106a43",
-                border_color="#1f6aa5",
-                text_color="#ffffff",
-                checkmark_color="#ffffff"
+                fg_color=PRIMARY,
+                hover_color=PRIMARY_HOVER,
+                border_color=PRIMARY,
+                text_color=INK,
+                checkmark_color=ON_PRIMARY
             )
             checkbox.pack(side="left", padx=20, pady=6)
 
@@ -182,11 +186,11 @@ class IconGeneratorPage(ctk.CTkFrame):
                 checkbox_height=22,
                 border_width=2,
                 corner_radius=4,
-                fg_color="#2fa572",
-                hover_color="#106a43",
-                border_color="#1f6aa5",
-                text_color="#ffffff",
-                checkmark_color="#ffffff"
+                fg_color=PRIMARY,
+                hover_color=PRIMARY_HOVER,
+                border_color=PRIMARY,
+                text_color=INK,
+                checkmark_color=ON_PRIMARY
             )
             checkbox.pack(side="left", padx=20, pady=6)
 
@@ -200,22 +204,22 @@ class IconGeneratorPage(ctk.CTkFrame):
             command=self._convert_image,
             font=ui_font(14, weight="bold"),
             height=50,
-            fg_color="#2ECC71",
-            hover_color="#27AE60",
-            text_color="#FFFFFF",
+            fg_color=PRIMARY,
+            hover_color=PRIMARY_HOVER,
+            text_color=ON_PRIMARY,
             state="disabled"
         )
         self.convert_btn.pack(pady=10, padx=20, fill="x")
 
         # 状态栏
-        status_frame = ctk.CTkFrame(self)
+        status_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
         status_frame.pack(pady=8, padx=20, fill="x")
 
         self.file_label = ctk.CTkLabel(
             status_frame,
             text="文件: 未选择",
             font=ui_font(11),
-            text_color="gray",
+            text_color=SECONDARY,
             anchor="w"
         )
         self.file_label.pack(side="left", padx=10, pady=5)
@@ -224,7 +228,7 @@ class IconGeneratorPage(ctk.CTkFrame):
             status_frame,
             text="状态: 就绪",
             font=ui_font(11),
-            text_color="gray",
+            text_color=SECONDARY,
             anchor="e"
         )
         self.status_label.pack(side="right", padx=10, pady=5)

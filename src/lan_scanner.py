@@ -3,14 +3,14 @@ import customtkinter as ctk
 from tkinter import messagebox
 import threading
 from scanner_core import NetworkScanner
-from ui_style import ui_font, ui_mono_font
+from ui_style import APP_BG, CONTROL_FILL, CONTROL_HOVER, DESTRUCTIVE, INK, INPUT_BG, ON_PRIMARY, PRIMARY, PRIMARY_HOVER, SECONDARY, SUCCESS, SURFACE, TERMINAL_BG, ui_font, ui_mono_font
 
 
 class LanScannerPage(ctk.CTkFrame):
     """局域网扫描器页面"""
 
     def __init__(self, parent, back_callback):
-        super().__init__(parent, fg_color="transparent")
+        super().__init__(parent, fg_color=APP_BG)
 
         self.scanner = NetworkScanner()
         self.back_callback = back_callback
@@ -37,8 +37,9 @@ class LanScannerPage(ctk.CTkFrame):
             width=80,
             height=32,
             font=ui_font(13),
-            fg_color="#444444",
-            hover_color="#555555"
+            fg_color=CONTROL_FILL,
+            hover_color=CONTROL_HOVER,
+            text_color=INK
         )
         back_btn.pack(side="left")
 
@@ -46,12 +47,12 @@ class LanScannerPage(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             top_bar,
             text="局域网扫描器",
-            font=ui_font(20, weight="bold")
+            font=ui_font(20, weight="bold"), text_color=INK
         )
         title_label.pack(side="left", padx=20)
 
         # 配置区域
-        config_frame = ctk.CTkFrame(self, fg_color="#2b2b2b")
+        config_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
         config_frame.pack(pady=10, padx=20, fill="x")
 
         # 本机IP
@@ -61,7 +62,7 @@ class LanScannerPage(ctk.CTkFrame):
         ctk.CTkLabel(
             ip_row,
             text="本机IP:",
-            font=ui_font(12, weight="bold"),
+            font=ui_font(12, weight="bold"), text_color=INK,
             width=80,
             anchor="w"
         ).pack(side="left", padx=(0, 10))
@@ -70,7 +71,7 @@ class LanScannerPage(ctk.CTkFrame):
             ip_row,
             text="检测中...",
             font=ui_font(12),
-            text_color="#5B8DEE"
+            text_color=PRIMARY
         )
         self.local_ip_label.pack(side="left")
 
@@ -81,7 +82,7 @@ class LanScannerPage(ctk.CTkFrame):
         ctk.CTkLabel(
             network_row,
             text="网络段:",
-            font=ui_font(12, weight="bold"),
+            font=ui_font(12, weight="bold"), text_color=INK,
             width=80,
             anchor="w"
         ).pack(side="left", padx=(0, 10))
@@ -90,6 +91,9 @@ class LanScannerPage(ctk.CTkFrame):
             network_row,
             placeholder_text="例如: 192.168.1.0/24",
             font=ui_font(12),
+            fg_color=INPUT_BG,
+            border_color=CONTROL_HOVER,
+            text_color=INK,
             width=200
         )
         self.network_entry.pack(side="left", padx=(0, 10))
@@ -99,7 +103,7 @@ class LanScannerPage(ctk.CTkFrame):
             network_row,
             text=f"扫描端口: {', '.join(map(str, NetworkScanner.DEFAULT_PORTS.keys()))}",
             font=ui_font(10),
-            text_color="#888888"
+            text_color=SECONDARY
         ).pack(side="left", padx=10)
 
         # 扫描按钮
@@ -109,13 +113,13 @@ class LanScannerPage(ctk.CTkFrame):
             command=self._start_scan,
             font=ui_font(14, weight="bold"),
             height=40,
-            fg_color="#2ECC71",
-            hover_color="#27AE60"
+            fg_color=PRIMARY,
+            hover_color=PRIMARY_HOVER
         )
         self.scan_btn.pack(pady=10, padx=15, fill="x")
 
         # 进度条
-        self.progress_bar = ctk.CTkProgressBar(self, mode="determinate")
+        self.progress_bar = ctk.CTkProgressBar(self, mode="determinate", fg_color=CONTROL_FILL, progress_color=PRIMARY)
         self.progress_bar.pack(pady=5, padx=20, fill="x")
         self.progress_bar.set(0)
 
@@ -124,25 +128,27 @@ class LanScannerPage(ctk.CTkFrame):
             self,
             text="就绪",
             font=ui_font(11),
-            text_color="#888888"
+            text_color=SECONDARY
         )
         self.status_label.pack(pady=5)
 
         # 结果区域
-        result_frame = ctk.CTkFrame(self, fg_color="#2b2b2b")
+        result_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
         result_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
         result_title = ctk.CTkLabel(
             result_frame,
             text="扫描结果",
-            font=ui_font(12, weight="bold")
+            font=ui_font(12, weight="bold"), text_color=INK, anchor="w"
         )
-        result_title.pack(pady=8)
+        result_title.pack(fill="x", padx=20, pady=(14, 8))
 
         # 结果文本框（使用CTkTextbox）
         self.result_text = ctk.CTkTextbox(
             result_frame,
             font=ui_mono_font(13),
+            fg_color=TERMINAL_BG,
+            text_color=ON_PRIMARY,
             wrap="none"
         )
         self.result_text.pack(pady=5, padx=10, fill="both", expand=True)
@@ -169,7 +175,7 @@ class LanScannerPage(ctk.CTkFrame):
             # 停止扫描
             self.scanner.stop_scan()
             self.is_scanning = False
-            self.scan_btn.configure(text="开始扫描", fg_color="#2ECC71")
+            self.scan_btn.configure(text="开始扫描", fg_color=PRIMARY)
             self.status_label.configure(text="已停止")
             return
 
@@ -191,7 +197,7 @@ class LanScannerPage(ctk.CTkFrame):
 
         # 更新UI状态
         self.is_scanning = True
-        self.scan_btn.configure(text="停止扫描", fg_color="#E74C3C")
+        self.scan_btn.configure(text="停止扫描", fg_color=DESTRUCTIVE)
         self.status_label.configure(text="扫描中...")
 
         # 在新线程中执行扫描
@@ -262,7 +268,7 @@ class LanScannerPage(ctk.CTkFrame):
     def _scan_finished(self):
         """扫描完成"""
         self.is_scanning = False
-        self.scan_btn.configure(text="开始扫描", fg_color="#2ECC71")
+        self.scan_btn.configure(text="开始扫描", fg_color=PRIMARY)
         self.status_label.configure(text="扫描完成")
         self.progress_bar.set(1.0)
 
