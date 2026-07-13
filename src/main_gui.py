@@ -3,6 +3,13 @@ import customtkinter as ctk
 from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
 
+UI_FONT_FAMILY = "Noto Sans CJK SC"
+
+
+def ui_font(size, weight="normal"):
+    """Return the CJK-capable font used throughout the main interface."""
+    return ctk.CTkFont(family=UI_FONT_FAMILY, size=size, weight=weight)
+
 
 class ToolboxApp(ctk.CTk):
     """多功能工具箱主应用"""
@@ -41,14 +48,14 @@ class ToolboxApp(ctk.CTk):
         title = ctk.CTkLabel(
             main_frame,
             text="🛠️ 多功能工具箱",
-            font=ctk.CTkFont(size=32, weight="bold")
+            font=ui_font(size=32, weight="bold")
         )
         title.pack(pady=(40, 20))
 
         subtitle = ctk.CTkLabel(
             main_frame,
             text="选择一个工具开始使用",
-            font=ctk.CTkFont(size=14),
+            font=ui_font(size=14),
             text_color="#888888"
         )
         subtitle.pack(pady=(0, 40))
@@ -87,7 +94,7 @@ class ToolboxApp(ctk.CTk):
         footer = ctk.CTkLabel(
             main_frame,
             text="v1.0.0 | 更多工具持续添加中...",
-            font=ctk.CTkFont(size=11),
+            font=ui_font(size=11),
             text_color="#666666"
         )
         footer.pack(side="bottom", pady=20)
@@ -105,7 +112,7 @@ class ToolboxApp(ctk.CTk):
         icon_label = ctk.CTkLabel(
             card,
             text=icon,
-            font=ctk.CTkFont(size=48)
+            font=ui_font(size=48)
         )
         icon_label.pack(pady=(30, 10))
 
@@ -113,7 +120,7 @@ class ToolboxApp(ctk.CTk):
         title_label = ctk.CTkLabel(
             card,
             text=title,
-            font=ctk.CTkFont(size=18, weight="bold")
+            font=ui_font(size=18, weight="bold")
         )
         title_label.pack(pady=(0, 10))
 
@@ -121,7 +128,7 @@ class ToolboxApp(ctk.CTk):
         desc_label = ctk.CTkLabel(
             card,
             text=description,
-            font=ctk.CTkFont(size=12),
+            font=ui_font(size=12),
             text_color="#aaaaaa",
             justify="center"
         )
@@ -132,7 +139,7 @@ class ToolboxApp(ctk.CTk):
             card,
             text="打开工具",
             command=command,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ui_font(size=14, weight="bold"),
             height=40,
             fg_color=color,
             hover_color=self._darken_color(color)

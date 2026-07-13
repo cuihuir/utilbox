@@ -60,8 +60,11 @@ cd utilbox
 # 安装 uv（如果未安装）
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 安装系统依赖（Linux）
-sudo apt install python3-tk fonts-noto-cjk
+# 安装系统依赖（Debian/Ubuntu）
+sudo apt install python3-tk fonts-noto-cjk fonts-noto-color-emoji
+
+# Fedora 使用：
+# sudo dnf install python3-tkinter google-noto-sans-cjk-vf-fonts google-noto-color-emoji-fonts
 
 # 安装 Python 依赖
 uv sync
