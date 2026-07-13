@@ -4,6 +4,7 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from pathlib import Path
 from converter import ImageConverter
+from ui_style import ui_font
 
 
 class IconGeneratorPage(ctk.CTkFrame):
@@ -35,7 +36,7 @@ class IconGeneratorPage(ctk.CTkFrame):
             command=self.back_callback,
             width=80,
             height=32,
-            font=ctk.CTkFont(size=13),
+            font=ui_font(13),
             fg_color="#444444",
             hover_color="#555555"
         )
@@ -44,17 +45,17 @@ class IconGeneratorPage(ctk.CTkFrame):
         # 标题
         title_label = ctk.CTkLabel(
             top_bar,
-            text="🎨 图标生成器",
-            font=ctk.CTkFont(size=20, weight="bold")
+            text="图标生成器",
+            font=ui_font(20, weight="bold")
         )
         title_label.pack(side="left", padx=20)
 
         # 选择图片按钮
         self.select_btn = ctk.CTkButton(
             self,
-            text="📁 选择图片文件",
+            text="选择图片文件",
             command=self._select_file,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ui_font(14, weight="bold"),
             height=50,
             fg_color="#5B8DEE",
             hover_color="#4A7BD8",
@@ -69,13 +70,14 @@ class IconGeneratorPage(ctk.CTkFrame):
         preview_title = ctk.CTkLabel(
             preview_frame,
             text="图片预览",
-            font=ctk.CTkFont(size=12, weight="bold")
+            font=ui_font(12, weight="bold")
         )
         preview_title.pack(pady=6)
 
         self.preview_label = ctk.CTkLabel(
             preview_frame,
             text="",
+            font=ui_font(12),
             width=150,
             height=150
         )
@@ -84,7 +86,7 @@ class IconGeneratorPage(ctk.CTkFrame):
         self.info_label = ctk.CTkLabel(
             preview_frame,
             text="",
-            font=ctk.CTkFont(size=10),
+            font=ui_font(10),
             text_color="gray"
         )
         self.info_label.pack(pady=4)
@@ -100,7 +102,7 @@ class IconGeneratorPage(ctk.CTkFrame):
         size_title = ctk.CTkLabel(
             title_bar,
             text="ICO尺寸选择",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ui_font(12, weight="bold"),
             text_color="#ffffff"
         )
         size_title.pack(side="left")
@@ -115,7 +117,7 @@ class IconGeneratorPage(ctk.CTkFrame):
             command=self._select_all_sizes,
             width=60,
             height=24,
-            font=ctk.CTkFont(size=10),
+            font=ui_font(10),
             fg_color="#1f6aa5",
             hover_color="#144870"
         )
@@ -127,7 +129,7 @@ class IconGeneratorPage(ctk.CTkFrame):
             command=self._clear_all_sizes,
             width=60,
             height=24,
-            font=ctk.CTkFont(size=10),
+            font=ui_font(10),
             fg_color="#666666",
             hover_color="#555555"
         )
@@ -150,7 +152,7 @@ class IconGeneratorPage(ctk.CTkFrame):
                 row1_frame,
                 text=f"  {size}x{size}  ",
                 variable=var,
-                font=ctk.CTkFont(size=12, weight="bold"),
+                font=ui_font(12, weight="bold"),
                 checkbox_width=22,
                 checkbox_height=22,
                 border_width=2,
@@ -175,7 +177,7 @@ class IconGeneratorPage(ctk.CTkFrame):
                 row2_frame,
                 text=f"  {size}x{size}  ",
                 variable=var,
-                font=ctk.CTkFont(size=12, weight="bold"),
+                font=ui_font(12, weight="bold"),
                 checkbox_width=22,
                 checkbox_height=22,
                 border_width=2,
@@ -189,14 +191,14 @@ class IconGeneratorPage(ctk.CTkFrame):
             checkbox.pack(side="left", padx=20, pady=6)
 
         # 添加底部间距
-        ctk.CTkLabel(size_frame, text="", height=6).pack()
+        ctk.CTkLabel(size_frame, text="", font=ui_font(12), height=6).pack()
 
         # 转换按钮（移到底部）
         self.convert_btn = ctk.CTkButton(
             self,
-            text="✨ 转换为ICO",
+            text="转换为 ICO",
             command=self._convert_image,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ui_font(14, weight="bold"),
             height=50,
             fg_color="#2ECC71",
             hover_color="#27AE60",
@@ -212,7 +214,7 @@ class IconGeneratorPage(ctk.CTkFrame):
         self.file_label = ctk.CTkLabel(
             status_frame,
             text="文件: 未选择",
-            font=ctk.CTkFont(size=11),
+            font=ui_font(11),
             text_color="gray",
             anchor="w"
         )
@@ -221,7 +223,7 @@ class IconGeneratorPage(ctk.CTkFrame):
         self.status_label = ctk.CTkLabel(
             status_frame,
             text="状态: 就绪",
-            font=ctk.CTkFont(size=11),
+            font=ui_font(11),
             text_color="gray",
             anchor="e"
         )

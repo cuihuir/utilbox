@@ -2,13 +2,7 @@
 import customtkinter as ctk
 from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
-
-UI_FONT_FAMILY = "Noto Sans CJK SC"
-
-
-def ui_font(size, weight="normal"):
-    """Return the CJK-capable font used throughout the main interface."""
-    return ctk.CTkFont(family=UI_FONT_FAMILY, size=size, weight=weight)
+from ui_style import UI_FONT_FAMILY, load_icon, ui_font
 
 
 class ToolboxApp(ctk.CTk):
@@ -29,6 +23,7 @@ class ToolboxApp(ctk.CTk):
 
         # 当前页面
         self.current_page = None
+        self.tool_icons = []
 
         # 创建主界面
         self._create_main_page()
@@ -38,6 +33,7 @@ class ToolboxApp(ctk.CTk):
         # 清除当前页面
         if self.current_page:
             self.current_page.destroy()
+        self.tool_icons = []
 
         # 创建主容器
         main_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -47,7 +43,7 @@ class ToolboxApp(ctk.CTk):
         # 标题
         title = ctk.CTkLabel(
             main_frame,
-            text="🛠️ 多功能工具箱",
+            text="多功能工具箱",
             font=ui_font(size=32, weight="bold")
         )
         title.pack(pady=(40, 20))
@@ -72,7 +68,7 @@ class ToolboxApp(ctk.CTk):
         self._create_tool_card(
             cards_frame,
             row=0, col=0,
-            icon="🎨",
+            icon_name="image-converter",
             title="图标生成器",
             description="将PNG/JPG等图片转换为ICO格式\n支持多尺寸图标生成",
             command=self._open_icon_generator,
@@ -83,7 +79,7 @@ class ToolboxApp(ctk.CTk):
         self._create_tool_card(
             cards_frame,
             row=0, col=1,
-            icon="🔍",
+            icon_name="network-scan",
             title="局域网扫描器",
             description="扫描局域网内的活跃主机\n检测开放端口和服务",
             command=self._open_lan_scanner,
@@ -99,7 +95,7 @@ class ToolboxApp(ctk.CTk):
         )
         footer.pack(side="bottom", pady=20)
 
-    def _create_tool_card(self, parent, row, col, icon, title, description, command, color):
+    def _create_tool_card(self, parent, row, col, icon_name, title, description, command, color):
         """创建工具卡片"""
         card = ctk.CTkFrame(
             parent,
@@ -111,9 +107,10 @@ class ToolboxApp(ctk.CTk):
         # 图标
         icon_label = ctk.CTkLabel(
             card,
-            text=icon,
-            font=ui_font(size=48)
+            text="",
+            image=load_icon(icon_name, 52)
         )
+        self.tool_icons.append(icon_label.cget("image"))
         icon_label.pack(pady=(30, 10))
 
         # 标题

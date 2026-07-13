@@ -52,6 +52,7 @@ def build_exe():
         # 收集Tcl/Tk数据文件（Linux需要）
         '--collect-all=tkinter',
         '--collect-all=customtkinter',
+        f'--add-data={project_root / "src" / "assets"}:assets',
     ]
 
     print("\n打包参数:")
