@@ -1,9 +1,10 @@
 """局域网扫描器页面"""
 import customtkinter as ctk
+import ipaddress
 from tkinter import messagebox
 import threading
 from scanner_core import NetworkScanner
-from ui_style import APP_BG, CONTROL_FILL, CONTROL_HOVER, DESTRUCTIVE, INK, INPUT_BG, ON_PRIMARY, PRIMARY, PRIMARY_HOVER, SECONDARY, SUCCESS, SURFACE, TERMINAL_BG, ui_font, ui_mono_font
+from ui_style import APP_BG, CONTROL_FILL, CONTROL_HOVER, DESTRUCTIVE, INK, INPUT_BG, ON_PRIMARY, PRIMARY, PRIMARY_HOVER, SECONDARY, SUCCESS, SURFACE, ui_font
 
 
 class LanScannerPage(ctk.CTkFrame):
@@ -27,7 +28,7 @@ class LanScannerPage(ctk.CTkFrame):
 
         # 顶部栏：返回按钮 + 标题
         top_bar = ctk.CTkFrame(self, fg_color="transparent")
-        top_bar.pack(fill="x", pady=(10, 15), padx=20)
+        top_bar.pack(fill="x", pady=(6, 8), padx=20)
 
         # 返回按钮
         back_btn = ctk.CTkButton(
@@ -53,11 +54,11 @@ class LanScannerPage(ctk.CTkFrame):
 
         # 配置区域
         config_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
-        config_frame.pack(pady=10, padx=20, fill="x")
+        config_frame.pack(pady=(0, 6), padx=20, fill="x")
 
         # 本机IP
         ip_row = ctk.CTkFrame(config_frame, fg_color="transparent")
-        ip_row.pack(pady=8, padx=15, fill="x")
+        ip_row.pack(pady=(8, 4), padx=15, fill="x")
 
         ctk.CTkLabel(
             ip_row,
@@ -77,7 +78,7 @@ class LanScannerPage(ctk.CTkFrame):
 
         # 网络段输入
         network_row = ctk.CTkFrame(config_frame, fg_color="transparent")
-        network_row.pack(pady=8, padx=15, fill="x")
+        network_row.pack(pady=4, padx=15, fill="x")
 
         ctk.CTkLabel(
             network_row,
@@ -87,16 +88,16 @@ class LanScannerPage(ctk.CTkFrame):
             anchor="w"
         ).pack(side="left", padx=(0, 10))
 
-        self.network_entry = ctk.CTkEntry(
-            network_row,
-            placeholder_text="例如: 192.168.1.0/24",
-            font=ui_font(12),
-            fg_color=INPUT_BG,
-            border_color=CONTROL_HOVER,
-            text_color=INK,
-            width=200
-        )
-        self.network_entry.pack(side="left", padx=(0, 10))
+        self.ip_entries = []
+        for index in range(4):
+            entry = ctk.CTkEntry(network_row, width=48, justify="center", font=ui_font(12), fg_color=INPUT_BG, border_color=CONTROL_HOVER, text_color=INK)
+            entry.pack(side="left")
+            self.ip_entries.append(entry)
+            if index < 3:
+                ctk.CTkLabel(network_row, text=".", font=ui_font(14, "bold"), text_color=SECONDARY, width=10).pack(side="left")
+        ctk.CTkLabel(network_row, text="/", font=ui_font(14, "bold"), text_color=SECONDARY, width=16).pack(side="left")
+        self.prefix_entry = ctk.CTkEntry(network_row, width=42, justify="center", font=ui_font(12), fg_color=INPUT_BG, border_color=CONTROL_HOVER, text_color=INK)
+        self.prefix_entry.pack(side="left", padx=(0, 10))
 
         # 扫描端口显示
         ctk.CTkLabel(
@@ -112,29 +113,31 @@ class LanScannerPage(ctk.CTkFrame):
             text="开始扫描",
             command=self._start_scan,
             font=ui_font(14, weight="bold"),
-            height=40,
+            height=36,
             fg_color=PRIMARY,
             hover_color=PRIMARY_HOVER
         )
-        self.scan_btn.pack(pady=10, padx=15, fill="x")
+        self.scan_btn.pack(pady=(6, 8), padx=15, fill="x")
 
         # 进度条
-        self.progress_bar = ctk.CTkProgressBar(self, mode="determinate", fg_color=CONTROL_FILL, progress_color=PRIMARY)
-        self.progress_bar.pack(pady=5, padx=20, fill="x")
+        progress_row = ctk.CTkFrame(self, fg_color="transparent")
+        progress_row.pack(fill="x", padx=20, pady=(0, 4))
+        self.progress_bar = ctk.CTkProgressBar(progress_row, mode="determinate", fg_color=CONTROL_FILL, progress_color=PRIMARY)
+        self.progress_bar.pack(side="left", fill="x", expand=True)
         self.progress_bar.set(0)
 
         # 状态标签
         self.status_label = ctk.CTkLabel(
-            self,
+            progress_row,
             text="就绪",
             font=ui_font(11),
             text_color=SECONDARY
         )
-        self.status_label.pack(pady=5)
+        self.status_label.pack(side="right", padx=(12, 0))
 
         # 结果区域
         result_frame = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=14)
-        result_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        result_frame.pack(pady=(4, 10), padx=20, fill="both", expand=True)
 
         result_title = ctk.CTkLabel(
             result_frame,
@@ -143,15 +146,12 @@ class LanScannerPage(ctk.CTkFrame):
         )
         result_title.pack(fill="x", padx=20, pady=(14, 8))
 
-        # 结果文本框（使用CTkTextbox）
-        self.result_text = ctk.CTkTextbox(
-            result_frame,
-            font=ui_mono_font(13),
-            fg_color=TERMINAL_BG,
-            text_color=ON_PRIMARY,
-            wrap="none"
-        )
-        self.result_text.pack(pady=5, padx=10, fill="both", expand=True)
+        self.result_summary = ctk.CTkLabel(result_frame, text="等待开始扫描", font=ui_font(12), text_color=SECONDARY, anchor="w")
+        self.result_summary.pack(fill="x", padx=20, pady=(0, 8))
+        self.results_list = ctk.CTkScrollableFrame(result_frame, fg_color="transparent")
+        self.results_list.pack(padx=10, pady=(0, 10), fill="both", expand=True)
+        self.empty_label = ctk.CTkLabel(self.results_list, text="扫描结果会显示在这里", font=ui_font(13), text_color=SECONDARY)
+        self.empty_label.pack(pady=35)
 
         # 初始化结果计数
         self.found_count = 0
@@ -162,9 +162,7 @@ class LanScannerPage(ctk.CTkFrame):
             local_ip = self.scanner.get_local_ip()
             self.local_ip_label.configure(text=local_ip)
 
-            network = self.scanner.get_network_range(local_ip)
-            self.network_entry.delete(0, "end")
-            self.network_entry.insert(0, network)
+            self._set_network(self.scanner.get_network_range(local_ip))
         except Exception as e:
             self.local_ip_label.configure(text="检测失败")
             messagebox.showerror("错误", f"网络检测失败: {str(e)}")
@@ -179,30 +177,49 @@ class LanScannerPage(ctk.CTkFrame):
             self.status_label.configure(text="已停止")
             return
 
-        network = self.network_entry.get().strip()
-        if not network:
-            messagebox.showwarning("警告", "请输入网络段")
+        try:
+            network = self._network_value()
+        except ValueError as error:
+            messagebox.showwarning("网络段无效", str(error))
             return
 
         # 清空结果
-        self.result_text.delete("1.0", "end")
+        self._clear_results()
         self.progress_bar.set(0)
         self.found_count = 0
-
-        # 显示表头
-        header = f"{'IP地址':<15} {'主机名':<20} {'开放端口'}\n"
-        separator = "=" * 80 + "\n"
-        self.result_text.insert("end", header)
-        self.result_text.insert("end", separator)
 
         # 更新UI状态
         self.is_scanning = True
         self.scan_btn.configure(text="停止扫描", fg_color=DESTRUCTIVE)
         self.status_label.configure(text="扫描中...")
+        self.result_summary.configure(text="正在扫描局域网…")
 
         # 在新线程中执行扫描
         thread = threading.Thread(target=self._scan_thread, args=(network,), daemon=True)
         thread.start()
+
+    def _set_network(self, network):
+        parsed = ipaddress.IPv4Network(network, strict=False)
+        for entry, octet in zip(self.ip_entries, str(parsed.network_address).split(".")):
+            entry.delete(0, "end")
+            entry.insert(0, octet)
+        self.prefix_entry.delete(0, "end")
+        self.prefix_entry.insert(0, str(parsed.prefixlen))
+
+    def _network_value(self):
+        values = [entry.get().strip() for entry in self.ip_entries]
+        if any(not value for value in values):
+            raise ValueError("请填写完整的 IPv4 地址")
+        try:
+            octets = [int(value) for value in values]
+            if any(value < 0 or value > 255 for value in octets):
+                raise ValueError
+            prefix = int(self.prefix_entry.get().strip())
+            if not 0 <= prefix <= 32:
+                raise ValueError
+        except ValueError as error:
+            raise ValueError("IPv4 地址或前缀长度无效") from error
+        return str(ipaddress.IPv4Network(f"{'.'.join(map(str, octets))}/{prefix}", strict=False))
 
     def _scan_thread(self, network: str):
         """扫描线程"""
@@ -237,33 +254,26 @@ class LanScannerPage(ctk.CTkFrame):
         """实时添加发现的主机到结果"""
         self.found_count += 1
 
-        ip = host['ip']
-        hostname = host['hostname']
-        open_ports = [
-            f"{port}({self.scanner.get_service_name(port)})"
-            for port, is_open in host['ports'].items()
-            if is_open
-        ]
-        ports_str = ', '.join(open_ports)
-
-        line = f"{ip:<15} {hostname:<20} {ports_str}\n"
-        self.result_text.insert("end", line)
-
-        # 自动滚动到底部
-        self.result_text.see("end")
+        if self.empty_label.winfo_exists(): self.empty_label.destroy()
+        row = ctk.CTkFrame(self.results_list, fg_color=CONTROL_FILL, corner_radius=10)
+        row.pack(fill="x", padx=4, pady=4)
+        ctk.CTkLabel(row, text="●", text_color=SUCCESS, font=ui_font(14)).pack(side="left", padx=(12, 8), pady=10)
+        details = ctk.CTkFrame(row, fg_color="transparent")
+        details.pack(side="left", fill="x", expand=True, pady=8)
+        ctk.CTkLabel(details, text=host['ip'], text_color=INK, font=ui_font(14, "bold"), anchor="w").pack(fill="x")
+        ctk.CTkLabel(details, text=host['hostname'], text_color=SECONDARY, font=ui_font(12), anchor="w").pack(fill="x")
+        ports = [f"{port} · {self.scanner.get_service_name(port)}" for port, open_ in host['ports'].items() if open_]
+        ctk.CTkLabel(row, text="\n".join(ports), text_color=PRIMARY, font=ui_font(11), justify="right").pack(side="right", padx=12)
+        self.result_summary.configure(text=f"已发现 {self.found_count} 台设备")
 
     def _show_summary(self, results):
         """显示扫描统计信息"""
-        separator = "=" * 80 + "\n"
-        self.result_text.insert("end", separator)
-
         if self.found_count == 0:
-            self.result_text.insert("end", "\n未发现活跃主机\n")
+            self.empty_label = ctk.CTkLabel(self.results_list, text="未发现活跃设备\n请检查网络段或稍后重试", font=ui_font(13), text_color=SECONDARY, justify="center")
+            self.empty_label.pack(pady=35)
+            self.result_summary.configure(text="扫描完成，未发现活跃设备")
         else:
-            self.result_text.insert("end", f"\n扫描完成！共发现 {self.found_count} 台活跃主机\n")
-
-        # 自动滚动到底部
-        self.result_text.see("end")
+            self.result_summary.configure(text=f"扫描完成，发现 {self.found_count} 台活跃设备")
 
     def _scan_finished(self):
         """扫描完成"""
@@ -271,6 +281,11 @@ class LanScannerPage(ctk.CTkFrame):
         self.scan_btn.configure(text="开始扫描", fg_color=PRIMARY)
         self.status_label.configure(text="扫描完成")
         self.progress_bar.set(1.0)
+
+    def _clear_results(self):
+        for child in self.results_list.winfo_children(): child.destroy()
+        self.empty_label = ctk.CTkLabel(self.results_list, text="正在准备扫描…", font=ui_font(13), text_color=SECONDARY)
+        self.empty_label.pack(pady=35)
 
 
 # 如果直接运行此文件，创建独立窗口用于测试

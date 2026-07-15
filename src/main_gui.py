@@ -3,6 +3,7 @@ import customtkinter as ctk
 
 from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
+from utility_pages import ImageProcessorPage, PortInspectorPage, QrPage
 from ui_style import APP_BG, CHEVRON, HEADER_BG, HOVER_SURFACE, INK, MAX_CONTENT_WIDTH, PAGE_MARGIN, PRIMARY, ROW_INSET, SECONDARY, SECTION_INSET, SEPARATOR, SUCCESS, SURFACE, load_icon, ui_font
 
 
@@ -21,6 +22,7 @@ class ToolboxApp(ctk.CTk):
         self.home_page = None
         self.icon_page = None
         self.scanner_page = None
+        self.port_page = self.qr_page = self.image_page = None
         self.tool_icons = []
         self._create_main_page()
         self.after(300, self._preload_pages)
@@ -43,28 +45,29 @@ class ToolboxApp(ctk.CTk):
         footer = ctk.CTkLabel(page, text="UtilBox  ·  版本 1.0.0", font=ui_font(13), text_color=SECONDARY)
         footer.pack(side="bottom", anchor="w", padx=PAGE_MARGIN + SECTION_INSET, pady=(0, 20))
 
-        body = ctk.CTkFrame(page, fg_color="transparent")
+        body = ctk.CTkScrollableFrame(page, fg_color="transparent", scrollbar_button_color=CHEVRON, scrollbar_button_hover_color=SECONDARY)
         body.pack(fill="both", expand=True, padx=PAGE_MARGIN, pady=(27, 0))
-        ctk.CTkLabel(body, text="我的工具", font=ui_font(13), text_color=SECONDARY).pack(anchor="w", padx=SECTION_INSET, pady=(0, 10))
-        tools = ctk.CTkFrame(body, fg_color=SURFACE, corner_radius=14)
-        tools.pack(fill="x")
-        self._tool_row(tools, "image-converter", "图标生成器", "把图片转换为 ICO 图标", PRIMARY, self._open_icon_generator)
-        ctk.CTkFrame(tools, fg_color=SEPARATOR, height=1).pack(fill="x", padx=(90, ROW_INSET))
-        self._tool_row(tools, "network-scan", "局域网扫描器", "查找设备并查看开放服务", SUCCESS, self._open_lan_scanner)
+        self._tool_group(body, "图像与分享", [
+            ("image-converter", "图标生成器", "把图片转换为 ICO 图标", PRIMARY, self._open_icon_generator),
+            ("image-converter", "二维码工具", "生成并保存本地二维码", SUCCESS, self._open_qr),
+            ("image-converter", "图片压缩与转换", "批量压缩与格式转换", PRIMARY, self._open_image_processor),
+        ])
+        self._tool_group(body, "网络与系统", [
+            ("network-scan", "局域网扫描器", "查找设备并查看开放服务", SUCCESS, self._open_lan_scanner),
+            ("network-scan", "本地端口占用", "查看监听端口、PID 与进程", PRIMARY, self._open_port),
+        ])
+        ctk.CTkFrame(body, fg_color="transparent", height=36).pack(fill="x")
 
-        ctk.CTkLabel(body, text="状态", font=ui_font(13), text_color=SECONDARY).pack(anchor="w", padx=SECTION_INSET, pady=(32, 10))
-        status = ctk.CTkFrame(body, fg_color=SURFACE, corner_radius=14, height=72)
-        status.pack(fill="x")
-        status.pack_propagate(False)
-        ctk.CTkLabel(status, text="✓", font=ui_font(17, "bold"), text_color=SUCCESS).pack(side="left", padx=(ROW_INSET, 18))
-        ctk.CTkLabel(status, text="所有工具已准备就绪", font=ui_font(16), text_color=INK).pack(side="left")
-        ctk.CTkLabel(status, text="2 个可用", font=ui_font(14), text_color=SECONDARY).pack(side="right", padx=28)
-        def constrain_content(event):
-            horizontal_padding = max(PAGE_MARGIN, (event.width - MAX_CONTENT_WIDTH) // 2)
-            body.pack_configure(padx=horizontal_padding)
-
-        page.bind("<Configure>", constrain_content)
         self._show_page(page)
+
+    def _tool_group(self, parent, title, items):
+        ctk.CTkLabel(parent, text=title, font=ui_font(13), text_color=SECONDARY).pack(anchor="w", padx=SECTION_INSET, pady=(0 if title == "图像与分享" else 22, 10))
+        group = ctk.CTkFrame(parent, fg_color=SURFACE, corner_radius=14)
+        group.pack(fill="x")
+        for index, item in enumerate(items):
+            self._tool_row(group, *item)
+            if index < len(items) - 1:
+                ctk.CTkFrame(group, fg_color=SEPARATOR, height=1).pack(fill="x", padx=(90, ROW_INSET))
 
     def _tool_row(self, parent, icon_name, title, description, color, command):
         row = ctk.CTkFrame(parent, fg_color=SURFACE, height=76, corner_radius=0)
@@ -101,6 +104,13 @@ class ToolboxApp(ctk.CTk):
         if self.scanner_page is None:
             self.scanner_page = LanScannerPage(self, self._create_main_page)
         self._show_page(self.scanner_page)
+
+    def _open_port(self):
+        self.port_page = self.port_page or PortInspectorPage(self, self._create_main_page); self._show_page(self.port_page)
+    def _open_qr(self):
+        self.qr_page = self.qr_page or QrPage(self, self._create_main_page); self._show_page(self.qr_page)
+    def _open_image_processor(self):
+        self.image_page = self.image_page or ImageProcessorPage(self, self._create_main_page); self._show_page(self.image_page)
 
     def _show_page(self, page):
         """Swap cached pages without rebuilding their widget trees."""

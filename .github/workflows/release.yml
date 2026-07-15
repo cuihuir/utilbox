@@ -1,0 +1,112 @@
+name: Build release packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync
+      - shell: pwsh
+        run: |
+          uv run pyinstaller utilbox.py --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets;assets"
+          Compress-Archive -Path dist/UtilBox.exe -DestinationPath UtilBox-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: UtilBox-Windows-x64.zip
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync
+      - run: |
+          uv run pyinstaller utilbox.py --name UtilBox --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          ditto -c -k --sequesterRsrc --keepParent dist/UtilBox.app UtilBox-macOS-arm64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: UtilBox-macOS-arm64.zip
+
+  linux-deb-appimage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+          uv sync
+          uv run pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          mkdir -p package/DEBIAN package/usr/bin
+          cp dist/utilbox package/usr/bin/utilbox
+          printf 'Package: utilbox\nVersion: %s\nArchitecture: amd64\nMaintainer: UtilBox Contributors\nDescription: Local desktop utility toolbox\n' "$VERSION" > package/DEBIAN/control
+          dpkg-deb --build package "utilbox_${VERSION}_amd64.deb"
+          mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
+          cp dist/utilbox AppDir/usr/bin/utilbox
+          cp src/assets/icons/image-converter.png AppDir/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          printf '#!/bin/sh\nexec "$APPDIR/usr/bin/utilbox" "$@"\n' > AppDir/AppRun
+          printf '[Desktop Entry]\nType=Application\nName=UtilBox\nExec=utilbox\nIcon=utilbox\nCategories=Utility;\n' > AppDir/utilbox.desktop
+          chmod +x AppDir/AppRun
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "UtilBox-${VERSION}-x86_64.AppImage"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            utilbox_*_amd64.deb
+            UtilBox-*-x86_64.AppImage
+
+  fedora-rpm:
+    runs-on: ubuntu-latest
+    container: fedora:42
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          dnf install -y python3 python3-tkinter python3-pip rpm-build ruby ruby-devel gcc make
+          python3 -m venv .venv
+          .venv/bin/pip install .
+          .venv/bin/pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          gem install fpm --no-document
+          fpm -s dir -t rpm -n utilbox -v "$VERSION" -C dist utilbox=/usr/bin/utilbox
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm
+          path: utilbox-*.x86_64.rpm
+
+  publish:
+    if: github.event_name == 'release'
+    needs: [windows, macos, linux-deb-appimage, fedora-rpm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
