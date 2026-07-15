@@ -57,7 +57,7 @@ jobs:
           python-version: '3.13'
       - run: |
           sudo apt-get update
-          sudo apt-get install -y appstreamcli libfuse2
+          sudo apt-get install -y appstream libfuse2
           uv sync --python "${{ steps.python.outputs.python-path }}"
           uv run pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
           VERSION="${GITHUB_REF_NAME#v}"
