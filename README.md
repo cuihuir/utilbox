@@ -15,6 +15,10 @@
 - **本地端口占用**：查看监听端口、进程和 PID；可关闭进程，需要权限时由系统授权。
 - **主题与缩放**：支持亮色/暗色模式，窗口内容可滚动并适应缩放。
 
+## 界面预览
+
+![UtilBox 工具首页](docs/images/home.png)
+
 ## 下载发行版
 
 在 [Releases](https://github.com/cuihuir/utilbox/releases) 下载对应系统的文件。发行包包含 Python 运行环境，无需安装 Python 或 uv。
