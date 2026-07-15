@@ -1,10 +1,11 @@
 """UtilBox main application window."""
 import customtkinter as ctk
+from PIL import Image, ImageTk
 
 from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
 from utility_pages import ImageProcessorPage, PortInspectorPage, QrPage
-from ui_style import APP_BG, CHEVRON, HEADER_BG, HOVER_SURFACE, INK, MAX_CONTENT_WIDTH, PAGE_MARGIN, PRIMARY, ROW_INSET, SECONDARY, SECTION_INSET, SEPARATOR, SUCCESS, SURFACE, load_icon, ui_font
+from ui_style import APP_BG, CHEVRON, HEADER_BG, HOVER_SURFACE, INK, MAX_CONTENT_WIDTH, PAGE_MARGIN, PRIMARY, ROW_INSET, SECONDARY, SECTION_INSET, SEPARATOR, SUCCESS, SURFACE, icon_path, load_icon, ui_font
 
 
 class ToolboxApp(ctk.CTk):
@@ -12,6 +13,14 @@ class ToolboxApp(ctk.CTk):
 
     def __init__(self):
         super().__init__()
+        self._app_icon = None
+        try:
+            with Image.open(icon_path("utilbox")) as image:
+                self._app_icon = ImageTk.PhotoImage(image.convert("RGBA"))
+            self.iconphoto(True, self._app_icon)
+        except ctk.TclError:
+            # Tk on some desktop platforms manages the bundle icon itself.
+            self._app_icon = None
         self.title("工具箱")
         self.geometry("800x600")
         self.minsize(700, 540)

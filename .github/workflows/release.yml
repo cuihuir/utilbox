@@ -21,7 +21,7 @@ jobs:
       - run: uv sync --python "${{ steps.python.outputs.python-path }}"
       - shell: pwsh
         run: |
-          uv run pyinstaller utilbox.py --paths src --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets;assets"
+          uv run pyinstaller utilbox.py --paths src --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --icon src/assets/icons/utilbox.ico --add-data "src/assets;assets"
           Compress-Archive -Path dist/UtilBox.exe -DestinationPath UtilBox-Windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -69,15 +69,15 @@ jobs:
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           mkdir -p package/DEBIAN package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox package/usr/bin/utilbox
-          cp src/assets/icons/image-converter.png package/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          cp src/assets/icons/utilbox.png package/usr/share/icons/hicolor/256x256/apps/utilbox.png
           printf '[Desktop Entry]\nType=Application\nName=UtilBox\nComment=Local desktop utility toolbox\nExec=utilbox\nIcon=utilbox\nTerminal=false\nCategories=Utility;\n' > package/usr/share/applications/utilbox.desktop
           printf 'Package: utilbox\nVersion: %s\nArchitecture: amd64\nMaintainer: UtilBox Contributors\nDescription: Local desktop utility toolbox\n' "$VERSION" > package/DEBIAN/control
           dpkg-deb --build package "utilbox_${VERSION}_amd64.deb"
           dpkg-deb -c "utilbox_${VERSION}_amd64.deb" | grep -q 'usr/share/applications/utilbox.desktop'
           mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox AppDir/usr/bin/utilbox
-          cp src/assets/icons/image-converter.png AppDir/usr/share/icons/hicolor/256x256/apps/utilbox.png
-          cp src/assets/icons/image-converter.png AppDir/utilbox.png
+          cp src/assets/icons/utilbox.png AppDir/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          cp src/assets/icons/utilbox.png AppDir/utilbox.png
           printf '#!/bin/sh\nexec "$APPDIR/usr/bin/utilbox" "$@"\n' > AppDir/AppRun
           printf '[Desktop Entry]\nType=Application\nName=UtilBox\nExec=utilbox\nIcon=utilbox\nCategories=Utility;\n' > AppDir/utilbox.desktop
           chmod +x AppDir/AppRun
@@ -101,13 +101,17 @@ jobs:
           dnf install -y python3 python3-tkinter python3-pip rpm-build ruby ruby-devel gcc make
           python3 -m venv .venv
           .venv/bin/pip install .
-          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
+          TKINTER_SO="$(.venv/bin/python -c 'import _tkinter; print(_tkinter.__file__)')"
+          TCL_LIB="$(ldd "$TKINTER_SO" | awk '/libtcl[0-9]/{print $3; exit}')"
+          TK_LIB="$(ldd "$TKINTER_SO" | awk '/libtk[0-9]/{print $3; exit}')"
+          test -f "$TCL_LIB" && test -f "$TK_LIB"
+          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "src/assets:assets"
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           gem install fpm --no-document
           mkdir -p package-root/usr/bin package-root/usr/share/applications package-root/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox package-root/usr/bin/utilbox
-          cp src/assets/icons/image-converter.png package-root/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          cp src/assets/icons/utilbox.png package-root/usr/share/icons/hicolor/256x256/apps/utilbox.png
           printf '[Desktop Entry]\nType=Application\nName=UtilBox\nComment=Local desktop utility toolbox\nExec=utilbox\nIcon=utilbox\nTerminal=false\nCategories=Utility;\n' > package-root/usr/share/applications/utilbox.desktop
           fpm -s dir -t rpm -n utilbox -v "$VERSION" -C package-root usr
           rpm -qlp utilbox-*.x86_64.rpm | grep -q '/usr/share/applications/utilbox.desktop'

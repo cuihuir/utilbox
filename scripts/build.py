@@ -40,7 +40,7 @@ def build_exe():
         '--name=toolbox',                        # 程序名称
         '--onefile',                             # 打包成单个文件
         '--windowed',                            # 无控制台窗口
-        '--icon=NONE',                           # 图标（可选）
+        f'--icon={project_root / "src" / "assets" / "icons" / "utilbox.ico"}',
         '--clean',                               # 清理临时文件
         '--noconfirm',                           # 不询问确认
         f'--distpath={project_root / "dist"}',   # 输出目录
