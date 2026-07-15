@@ -42,7 +42,7 @@ class ToolboxApp(ctk.CTk):
         self.appearance_button = ctk.CTkButton(header, text="深色", font=ui_font(14), text_color=PRIMARY, fg_color="transparent", hover_color=HOVER_SURFACE, width=62, command=self._toggle_appearance)
         self.appearance_button.pack(side="right", padx=28)
 
-        footer = ctk.CTkLabel(page, text="UtilBox  ·  版本 1.0.0", font=ui_font(13), text_color=SECONDARY)
+        footer = ctk.CTkLabel(page, text="UtilBox  ·  版本 1.1.0", font=ui_font(13), text_color=SECONDARY)
         footer.pack(side="bottom", anchor="w", padx=PAGE_MARGIN + SECTION_INSET, pady=(0, 20))
 
         body = ctk.CTkScrollableFrame(page, fg_color="transparent", scrollbar_button_color=CHEVRON, scrollbar_button_hover_color=SECONDARY)

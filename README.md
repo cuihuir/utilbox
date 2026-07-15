@@ -1,316 +1,125 @@
-# 🛠️ UtilBox
+# UtilBox
 
-一个现代化的多功能实用工具箱，集成图标生成、网络扫描等常用工具，支持Windows和Linux。
+一个离线优先的桌面实用工具箱，集成图片处理、二维码与网络诊断工具，支持 Windows、macOS 和 Linux。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.13+-green.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)
 
-## 📸 界面预览
+## 功能
 
-![主界面](docs/images/main.png)
+- **图标生成器**：将 PNG、JPG、BMP、GIF 转换为多尺寸 ICO。
+- **图片压缩与转换**：批量输出 JPEG、PNG 或 WebP，可调整质量与输出目录。
+- **二维码工具**：为文本、链接或 Wi-Fi 配置生成二维码，预览后保存 PNG。
+- **局域网扫描器**：自动检测本机网络，扫描设备与常用开放服务。
+- **本地端口占用**：查看监听端口、进程和 PID；可关闭进程，需要权限时由系统授权。
+- **主题与缩放**：支持亮色/暗色模式，窗口内容可滚动并适应缩放。
 
-![局域网扫描器](docs/images/scanner.png)
+## 下载发行版
 
-## ✨ 功能特性
+在 [Releases](https://github.com/cuihuir/utilbox/releases) 下载对应系统的文件。发行包包含 Python 运行环境，无需安装 Python 或 uv。
 
-### 🎨 图标生成器
-- 🖼️ 支持多种图片格式（PNG, JPG, BMP, GIF）转ICO
-- 📏 多尺寸ICO生成（16x16 到 256x256）
-- 👁️ 实时图片预览和信息显示
-- ⚡ 一键全选/清空尺寸选择
-- 🎯 现代化深色主题界面
+| 系统 | 文件 | 使用方式 |
+| --- | --- | --- |
+| Windows | `UtilBox-Windows-x64.zip` | 解压后运行 `UtilBox.exe` |
+| macOS Apple Silicon | `UtilBox-macOS-arm64.zip` | 解压后打开 `UtilBox.app` |
+| Ubuntu/Debian | `utilbox_*_amd64.deb` | `sudo apt install ./utilbox_*_amd64.deb` |
+| Fedora/RHEL | `utilbox-*.x86_64.rpm` | `sudo dnf install ./utilbox-*.x86_64.rpm` |
+| 通用 Linux | `UtilBox-*-x86_64.AppImage` | `chmod +x *.AppImage && ./*.AppImage` |
 
-### 🔍 局域网扫描器
-- 🌐 自动检测本机IP和网络段
-- ⚡ 快速并发扫描局域网内活跃主机
-- 🔌 检测常用端口（SSH, HTTP, Moonraker, API等）
-- 📊 实时显示扫描进度和结果
-- 💻 显示主机名和开放端口详情
-- ⏸️ 支持随时停止扫描
+> macOS 未签名构建首次打开可能需要在“系统设置 - 隐私与安全性”中确认。
 
-## 🚀 快速开始
+## 从源码运行
 
-### 前置要求
+### 前置条件
 
-- Python 3.13+ (Windows) 或 Python 3.10+ (Linux)
-- [uv](https://github.com/astral-sh/uv) 包管理器
+- Python 3.13+；Linux 推荐使用系统 Python，以获得稳定的 Tk 渲染。
+- [uv](https://github.com/astral-sh/uv)。
 
-### Linux 快速安装
+### Debian/Ubuntu
 
 ```bash
-# 克隆项目
 git clone https://github.com/cuihuir/utilbox.git
 cd utilbox
-
-# 运行安装脚本（自动安装 uv 和依赖）
 bash install.sh
-
-# 运行程序
-python utilbox.py
-```
-
-### 手动安装
-
-```bash
-# 克隆项目
-git clone https://github.com/cuihuir/utilbox.git
-cd utilbox
-
-# 安装 uv（如果未安装）
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 安装系统依赖（Debian/Ubuntu）
-sudo apt install python3-tk fonts-noto-cjk fonts-noto-color-emoji
-
-# Fedora 使用：
-# sudo dnf install python3-tkinter google-noto-sans-cjk-vf-fonts google-noto-color-emoji-fonts
-
-# 安装 Python 依赖
-uv sync
-
-# 运行主程序
-python utilbox.py
-
-# 或者使用 uv run
 uv run python utilbox.py
 ```
 
-### 单独测试工具
+### Fedora
 
 ```bash
-# 测试图标生成器
-uv run python src/icon_generator.py
-
-# 测试局域网扫描器
-uv run python src/lan_scanner.py
-
-# 测试核心功能（无需GUI）
-uv run python tests/test_converter.py
-uv run python tests/test_scanner.py
+sudo dnf install python3-tkinter google-noto-sans-cjk-vf-fonts google-noto-color-emoji-fonts
+git clone https://github.com/cuihuir/utilbox.git
+cd utilbox
+uv sync --python /usr/bin/python3
+uv run python utilbox.py
 ```
 
-### Windows打包
+### 手动安装依赖
 
 ```bash
-# 1. 安装开发依赖
-uv sync --extra dev
+# Debian/Ubuntu
+sudo apt install python3-tk fonts-noto-cjk fonts-noto-color-emoji
 
-# 2. 运行打包脚本
-uv run python scripts/build.py
-
-# 3. 可执行文件位置
-# dist/toolbox.exe
+# 同步 Python 依赖并运行
+uv sync
+uv run python utilbox.py
 ```
 
-### Linux 使用说明
+## 使用说明
 
-**推荐：直接运行源码**
+### 局域网扫描器
 
-由于 Python 3.13 使用 Tcl/Tk 9.0，而大多数 Linux 发行版仍使用 Tcl/Tk 8.6，打包后的程序可能无法在其他机器上运行。
+1. 应用自动填充本机网络。
+2. 分段编辑 IPv4 地址与网络前缀，例如 `192.168.1.0 / 24`。
+3. 点击“开始扫描”，在设备列表查看 IP、主机名和开放服务。
 
-```bash
-# 推荐方式：直接运行源码
-python utilbox.py
+### 本地端口占用
 
-# 优点：
-# - 兼容性好，使用系统的 Tcl/Tk 版本
-# - 无需打包，启动快
-# - 方便调试和修改
-```
+1. 进入页面后后台读取监听端口。
+2. 输入端口号后按 Enter 或点击“搜索”。
+3. 点击一行以选中；使用“关闭”终止对应进程。
 
-**可选：打包为单文件**
+### 二维码工具
 
-如果需要打包，建议使用系统 Python（而非 uv 的虚拟环境）：
+1. 输入文本、链接或 Wi-Fi 配置。
+2. 点击“生成二维码”查看预览。
+3. 点击“保存 PNG”选择保存位置。
 
-```bash
-# 1. 使用系统 Python 创建虚拟环境
-python3 -m venv .venv-system
-source .venv-system/bin/activate
+### 图片压缩与转换
 
-# 2. 安装依赖
-pip install customtkinter pillow pyinstaller
+1. 选择一张或多张图片。
+2. 选择 JPEG、PNG 或 WebP，并调整质量。
+3. 选择输出目录后执行批量处理，完成后查看体积变化。
 
-# 3. 打包
-python scripts/build.py
+## 发布自动化
 
-# 4. 测试
-./dist/toolbox
+发布 GitHub Release 会触发 `.github/workflows/release.yml`：
 
-# 注意：打包后的程序只能在相同或相近的系统版本上运行
-```
+- Windows Runner 构建 ZIP。
+- macOS Runner 构建 `.app` ZIP。
+- Ubuntu 构建 `.deb` 与 AppImage。
+- Fedora 容器构建 `.rpm`。
+- 所有产物自动上传到对应 Release。
 
-### Linux打包
+## 技术栈
 
-```bash
-# 1. 安装系统依赖
-sudo apt install python3-tk
+| 技术 | 用途 |
+| --- | --- |
+| CustomTkinter | 跨平台桌面界面 |
+| Pillow | 图标生成、图片压缩与格式转换 |
+| qrcode | 本地二维码生成 |
+| psutil | 本机端口与进程信息 |
+| socket + concurrent.futures | 局域网扫描 |
+| PyInstaller | 多平台发行包构建 |
 
-# 2. 安装开发依赖
-uv sync --extra dev
+## 注意事项
 
-# 3. 运行打包脚本
-uv run python scripts/build.py
+- WSL 需要 WSLg 或 X11 服务器才能显示 GUI。
+- 局域网扫描结果受防火墙、设备响应策略和网络环境影响。
+- 关闭受保护进程时会请求系统授权；请确认目标进程后再继续。
+- AppImage 需要匹配 CPU 架构；部分发行版可能需要安装 FUSE 兼容库。
 
-# 4. 可执行文件位置
-# dist/toolbox
+## 贡献与许可证
 
-# 注意：打包后的程序需要目标机器安装Tcl/Tk库
-# 在目标机器上运行：sudo apt install libtcl9.0 libtk9.0
-```
-
-## 📖 使用说明
-
-### 主界面
-启动程序后，在主界面选择需要使用的工具：
-- **图标生成器** - 转换图片为ICO格式
-- **局域网扫描器** - 扫描局域网设备
-
-### 图标生成器使用流程
-1. 点击"选择图片文件"按钮
-2. 查看图片信息和预览
-3. 选择需要的ICO尺寸（可使用全选/清空）
-4. 点击"转换为ICO"并选择保存位置
-
-### 局域网扫描器使用流程
-1. 自动检测本机IP和网络段
-2. 可手动修改网络段（如 192.168.1.0/24）
-3. 点击"开始扫描"
-4. 实时查看扫描结果（IP、主机名、开放端口）
-5. 扫描完成后查看统计信息
-
-## 🛠️ 技术栈
-
-| 技术 | 说明 |
-|------|------|
-| **GUI框架** | CustomTkinter - 现代化跨平台界面 |
-| **图片处理** | Pillow (PIL) - 强大的图像处理库 |
-| **网络扫描** | socket + concurrent.futures - 高性能并发扫描 |
-| **打包工具** | PyInstaller - 打包为独立可执行文件 |
-| **包管理** | uv - 极速Python包管理器 |
-
-## 📁 项目结构
-
-```
-utilbox/
-├── utilbox.py               # 主程序启动入口
-├── src/                     # 源代码目录
-│   ├── __init__.py
-│   ├── main_gui.py          # 主界面
-│   ├── icon_generator.py    # 图标生成器页面
-│   ├── lan_scanner.py       # 局域网扫描器页面
-│   ├── converter.py         # 图片转换核心逻辑
-│   └── scanner_core.py      # 网络扫描核心逻辑
-├── scripts/                 # 脚本文件
-│   └── build.py             # Windows打包脚本
-├── tests/                   # 测试文件
-│   ├── test_converter.py
-│   └── test_scanner.py
-├── docs/                    # 文档和截图
-│   └── images/
-│       ├── main.png
-│       └── scanner.png
-├── examples/                # 示例图片
-├── .gitignore
-├── .python-version
-├── LICENSE
-├── README.md
-├── pyproject.toml
-└── uv.lock
-```
-
-## 🔧 配置说明
-
-### 扫描端口配置
-
-默认扫描端口在 `scanner_core.py` 中定义：
-
-```python
-DEFAULT_PORTS = {
-    22: "SSH",
-    80: "HTTP",
-    81: "HTTP-Alt",
-    7125: "Moonraker",
-    9080: "Device-API",
-    50051: "Voice-API"
-}
-```
-
-可根据需要修改端口列表。
-
-## 📝 注意事项
-
-- **WSL环境**: 需要X11服务器（WSLg或VcXsrv）才能运行GUI
-- **Windows环境**: 可直接运行或打包成exe
-- **扫描速度**: 取决于网络环境和主机数量，通常几秒到几十秒
-- **防火墙**: 某些设备可能因防火墙设置无法被扫描到
-- **权限**: 扫描功能无需管理员权限
-
-## 🐛 问题排查
-
-### WSL中无法显示GUI？
-- 安装WSLg（Windows 11自带）
-- 或安装X11服务器（如VcXsrv）
-- 或直接在Windows上运行
-
-### 打包失败？
-- 确保已安装开发依赖：`uv sync --extra dev`
-- 检查PyInstaller版本是否兼容
-- **Windows**: 确保在Windows环境下打包
-- **Linux**: 确保已安装 `python3-tk`
-
-### Linux打包后无法运行？
-- 错误：`libtcl9.0.so: cannot open shared object file`
-- 解决：在目标机器上安装Tcl/Tk库
-  ```bash
-  sudo apt install libtcl9.0 libtk9.0
-  ```
-- 或者使用 `--onedir` 模式打包（会生成文件夹而非单文件）
-
-### 扫描器无法发现设备？
-- 检查防火墙设置
-- 确认网络段配置正确（如 192.168.1.0/24）
-- 某些设备可能禁用了端口响应
-- 尝试增加扫描超时时间
-
-### 图标转换失败？
-- 确认图片格式支持（PNG, JPG, BMP, GIF）
-- 检查图片文件是否损坏
-- 确保有足够的磁盘空间
-
-## 🚀 未来计划
-
-- [ ] 添加更多实用工具
-- [ ] 支持自定义端口扫描
-- [ ] 批量图片转换
-- [ ] 扫描结果导出（CSV/JSON）
-- [ ] 多语言支持
-- [ ] 主题切换（亮色/暗色）
-- [ ] 配置文件保存用户偏好
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request！
-
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 👨‍💻 作者
-
-- 项目主页: [https://github.com/cuihuir/utilbox](https://github.com/cuihuir/utilbox)
-- 问题反馈: [Issues](https://github.com/cuihuir/utilbox/issues)
-
-## ⭐ Star History
-
-如果这个项目对你有帮助，请给个Star支持一下！
-
----
-
-**Built with ❤️ using Python and CustomTkinter**
+欢迎提交 Issue 和 Pull Request。项目采用 [MIT License](LICENSE)。
