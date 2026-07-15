@@ -21,7 +21,7 @@ jobs:
       - run: uv sync --python "${{ steps.python.outputs.python-path }}"
       - shell: pwsh
         run: |
-          uv run pyinstaller utilbox.py --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets;assets"
+          uv run pyinstaller utilbox.py --paths src --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets;assets"
           Compress-Archive -Path dist/UtilBox.exe -DestinationPath UtilBox-Windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -39,7 +39,7 @@ jobs:
           python-version: '3.13'
       - run: uv sync --python "${{ steps.python.outputs.python-path }}"
       - run: |
-          uv run pyinstaller utilbox.py --name UtilBox --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          uv run pyinstaller utilbox.py --paths src --name UtilBox --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
           ditto -c -k --sequesterRsrc --keepParent dist/UtilBox.app UtilBox-macOS-arm64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -59,7 +59,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y appstream libfuse2
           uv sync --python "${{ steps.python.outputs.python-path }}"
-          uv run pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          uv run pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           mkdir -p package/DEBIAN package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
@@ -96,7 +96,7 @@ jobs:
           dnf install -y python3 python3-tkinter python3-pip rpm-build ruby ruby-devel gcc make
           python3 -m venv .venv
           .venv/bin/pip install .
-          .venv/bin/pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
+          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           gem install fpm --no-document

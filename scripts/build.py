@@ -35,7 +35,8 @@ def build_exe():
 
     # PyInstaller参数
     args = [
-        str(project_root / 'src/main_gui.py'),  # 主程序入口
+        str(project_root / 'utilbox.py'),       # 主程序入口
+        '--paths=src',                           # 包含项目模块目录
         '--name=toolbox',                        # 程序名称
         '--onefile',                             # 打包成单个文件
         '--windowed',                            # 无控制台窗口
@@ -49,6 +50,7 @@ def build_exe():
         '--hidden-import=lan_scanner',
         '--hidden-import=converter',
         '--hidden-import=scanner_core',
+        '--hidden-import=PIL._tkinter_finder',
         # 收集Tcl/Tk数据文件（Linux需要）
         '--collect-all=tkinter',
         '--collect-all=customtkinter',
