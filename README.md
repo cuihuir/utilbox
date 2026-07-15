@@ -32,6 +32,8 @@
 | 通用 Linux | `UtilBox-*-x86_64.AppImage` | `chmod +x *.AppImage && ./*.AppImage` |
 
 > macOS 未签名构建首次打开可能需要在“系统设置 - 隐私与安全性”中确认。
+>
+> AppImage 需要 FUSE 2：Fedora 安装 `sudo dnf install fuse-libs`，Debian/Ubuntu 安装 `sudo apt install libfuse2`。没有 FUSE 时，可运行 `./UtilBox-*.AppImage --appimage-extract-and-run`。
 
 ## 从源码运行
 
