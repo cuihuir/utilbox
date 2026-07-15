@@ -57,9 +57,14 @@ jobs:
           python-version: '3.13'
       - run: |
           sudo apt-get update
-          sudo apt-get install -y appstream libfuse2
+          sudo apt-get install -y appstream libfuse2 xvfb
           uv sync --python "${{ steps.python.outputs.python-path }}"
-          uv run pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
+          TKINTER_SO="$(uv run python -c 'import _tkinter; print(_tkinter.__file__)')"
+          TCL_LIB="$(ldd "$TKINTER_SO" | awk '/libtcl[0-9]/{print $3; exit}')"
+          TK_LIB="$(ldd "$TKINTER_SO" | awk '/libtk[0-9]/{print $3; exit}')"
+          test -f "$TCL_LIB" && test -f "$TK_LIB"
+          uv run pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "src/assets:assets"
+          if timeout 5s xvfb-run -a dist/utilbox; then exit 1; else test "$?" -eq 124; fi
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           mkdir -p package/DEBIAN package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
