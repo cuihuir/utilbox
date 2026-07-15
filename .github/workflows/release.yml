@@ -66,6 +66,7 @@ jobs:
           mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox AppDir/usr/bin/utilbox
           cp src/assets/icons/image-converter.png AppDir/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          cp src/assets/icons/image-converter.png AppDir/utilbox.png
           printf '#!/bin/sh\nexec "$APPDIR/usr/bin/utilbox" "$@"\n' > AppDir/AppRun
           printf '[Desktop Entry]\nType=Application\nName=UtilBox\nExec=utilbox\nIcon=utilbox\nCategories=Utility;\n' > AppDir/utilbox.desktop
           chmod +x AppDir/AppRun
