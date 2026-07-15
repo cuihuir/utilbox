@@ -8,6 +8,7 @@ Windows打包脚本
 3. 打包后的exe在 dist/toolbox.exe
 """
 import PyInstaller.__main__
+import os
 import shutil
 from pathlib import Path
 import sys
@@ -54,7 +55,8 @@ def build_exe():
         # 收集Tcl/Tk数据文件（Linux需要）
         '--collect-all=tkinter',
         '--collect-all=customtkinter',
-        f'--add-data={project_root / "src" / "assets"}:assets',
+        f'--add-data={project_root / "VERSION"}{os.pathsep}.',
+        f'--add-data={project_root / "src" / "assets"}{os.pathsep}assets',
     ]
 
     print("\n打包参数:")

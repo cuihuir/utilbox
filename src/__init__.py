@@ -1,5 +1,5 @@
 """UtilBox - 多功能实用工具箱"""
 
-__version__ = "1.1.2"
+from version import __version__
 __author__ = "UtilBox Contributors"
 __license__ = "MIT"

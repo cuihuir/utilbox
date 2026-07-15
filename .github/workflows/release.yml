@@ -21,7 +21,7 @@ jobs:
       - run: uv sync --python "${{ steps.python.outputs.python-path }}"
       - shell: pwsh
         run: |
-          .\.venv\Scripts\pyinstaller.exe utilbox.py --paths src --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --icon src/assets/icons/utilbox.ico --add-data "src/assets;assets"
+          .\.venv\Scripts\pyinstaller.exe utilbox.py --paths src --name UtilBox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --icon src/assets/icons/utilbox.ico --add-data "VERSION;." --add-data "src/assets;assets"
           Compress-Archive -Path dist/UtilBox.exe -DestinationPath UtilBox-Windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -39,7 +39,7 @@ jobs:
           python-version: '3.13'
       - run: uv sync --python "${{ steps.python.outputs.python-path }}"
       - run: |
-          .venv/bin/pyinstaller utilbox.py --paths src --name UtilBox --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "src/assets:assets"
+          .venv/bin/pyinstaller utilbox.py --paths src --name UtilBox --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-data "VERSION:." --add-data "src/assets:assets"
           ditto -c -k --sequesterRsrc --keepParent dist/UtilBox.app UtilBox-macOS-arm64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -63,10 +63,10 @@ jobs:
           TCL_LIB="$(ldd "$TKINTER_SO" | awk '/libtcl[0-9]/{print $3; exit}')"
           TK_LIB="$(ldd "$TKINTER_SO" | awk '/libtk[0-9]/{print $3; exit}')"
           test -f "$TCL_LIB" && test -f "$TK_LIB"
-          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "src/assets:assets"
+          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "VERSION:." --add-data "src/assets:assets"
           if timeout 5s xvfb-run -a dist/utilbox; then exit 1; else test "$?" -eq 124; fi
-          VERSION="${GITHUB_REF_NAME#v}"
-          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then test "v$VERSION" = "$GITHUB_REF_NAME"; fi
           mkdir -p package/DEBIAN package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox package/usr/bin/utilbox
           cp src/assets/icons/utilbox.png package/usr/share/icons/hicolor/256x256/apps/utilbox.png
@@ -105,9 +105,9 @@ jobs:
           TCL_LIB="$(ldd "$TKINTER_SO" | awk '/libtcl[0-9]/{print $3; exit}')"
           TK_LIB="$(ldd "$TKINTER_SO" | awk '/libtk[0-9]/{print $3; exit}')"
           test -f "$TCL_LIB" && test -f "$TK_LIB"
-          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "src/assets:assets"
-          VERSION="${GITHUB_REF_NAME#v}"
-          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          .venv/bin/pyinstaller utilbox.py --paths src --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --hidden-import PIL._tkinter_finder --add-binary "$TCL_LIB:." --add-binary "$TK_LIB:." --add-data "VERSION:." --add-data "src/assets:assets"
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then test "v$VERSION" = "$GITHUB_REF_NAME"; fi
           gem install fpm --no-document
           mkdir -p package-root/usr/bin package-root/usr/share/applications package-root/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox package-root/usr/bin/utilbox

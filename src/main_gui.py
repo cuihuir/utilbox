@@ -6,6 +6,7 @@ from icon_generator import IconGeneratorPage
 from lan_scanner import LanScannerPage
 from utility_pages import ImageProcessorPage, PortInspectorPage, QrPage
 from ui_style import APP_BG, CHEVRON, HEADER_BG, HOVER_SURFACE, INK, MAX_CONTENT_WIDTH, PAGE_MARGIN, PRIMARY, ROW_INSET, SECONDARY, SECTION_INSET, SEPARATOR, SUCCESS, SURFACE, icon_path, load_icon, ui_font
+from version import __version__
 
 
 class ToolboxApp(ctk.CTk):
@@ -51,7 +52,7 @@ class ToolboxApp(ctk.CTk):
         self.appearance_button = ctk.CTkButton(header, text="深色", font=ui_font(14), text_color=PRIMARY, fg_color="transparent", hover_color=HOVER_SURFACE, width=62, command=self._toggle_appearance)
         self.appearance_button.pack(side="right", padx=28)
 
-        footer = ctk.CTkLabel(page, text="UtilBox  ·  版本 1.1.2", font=ui_font(13), text_color=SECONDARY)
+        footer = ctk.CTkLabel(page, text=f"UtilBox  ·  版本 {__version__}", font=ui_font(13), text_color=SECONDARY)
         footer.pack(side="bottom", anchor="w", padx=PAGE_MARGIN + SECTION_INSET, pady=(0, 20))
 
         body = ctk.CTkScrollableFrame(page, fg_color="transparent", scrollbar_button_color=CHEVRON, scrollbar_button_hover_color=SECONDARY)
