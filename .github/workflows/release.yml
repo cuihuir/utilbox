@@ -59,8 +59,10 @@ jobs:
           uv run pyinstaller utilbox.py --name utilbox --onefile --windowed --noconfirm --clean --collect-all tkinter --collect-all customtkinter --add-data "src/assets:assets"
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
-          mkdir -p package/DEBIAN package/usr/bin
+          mkdir -p package/DEBIAN package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
           cp dist/utilbox package/usr/bin/utilbox
+          cp src/assets/icons/image-converter.png package/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          printf '[Desktop Entry]\nType=Application\nName=UtilBox\nComment=Local desktop utility toolbox\nExec=utilbox\nIcon=utilbox\nTerminal=false\nCategories=Utility;\n' > package/usr/share/applications/utilbox.desktop
           printf 'Package: utilbox\nVersion: %s\nArchitecture: amd64\nMaintainer: UtilBox Contributors\nDescription: Local desktop utility toolbox\n' "$VERSION" > package/DEBIAN/control
           dpkg-deb --build package "utilbox_${VERSION}_amd64.deb"
           mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
@@ -93,7 +95,11 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
           gem install fpm --no-document
-          fpm -s dir -t rpm -n utilbox -v "$VERSION" -C dist utilbox=/usr/bin/utilbox
+          mkdir -p package-root/usr/bin package-root/usr/share/applications package-root/usr/share/icons/hicolor/256x256/apps
+          cp dist/utilbox package-root/usr/bin/utilbox
+          cp src/assets/icons/image-converter.png package-root/usr/share/icons/hicolor/256x256/apps/utilbox.png
+          printf '[Desktop Entry]\nType=Application\nName=UtilBox\nComment=Local desktop utility toolbox\nExec=utilbox\nIcon=utilbox\nTerminal=false\nCategories=Utility;\n' > package-root/usr/share/applications/utilbox.desktop
+          fpm -s dir -t rpm -n utilbox -v "$VERSION" -C package-root usr
       - uses: actions/upload-artifact@v4
         with:
           name: rpm
